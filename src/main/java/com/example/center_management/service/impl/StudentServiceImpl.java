@@ -100,6 +100,8 @@ private String generateStudentCode() {
         res.setProvince(s.getProvince());
         res.setStatus(s.getStatus());
         res.setCreatedAt(s.getCreatedAt());
+        res.setUpdatedAt(s.getUpdatedAt());
+
         return res;
     }
 

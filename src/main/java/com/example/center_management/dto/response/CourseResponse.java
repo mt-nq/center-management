@@ -18,4 +18,5 @@ public class CourseResponse {
     private String content;
     private String status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

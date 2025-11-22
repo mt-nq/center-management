@@ -18,4 +18,5 @@ public class StudentResponse {
     private String province;
     private String status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

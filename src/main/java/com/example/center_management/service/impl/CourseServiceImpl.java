@@ -105,6 +105,7 @@ public void delete(Long id) {
         res.setContent(c.getContent());
         res.setStatus(c.getStatus());
         res.setCreatedAt(c.getCreatedAt());
+        res.setUpdatedAt(c.getUpdatedAt());
         return res;
     }
 }
