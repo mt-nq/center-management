@@ -1,13 +1,13 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/center_management
-    username: center_user
-    password: phamminhtuan51
+    url: jdbc:postgresql://ep-dark-lab-ahrmnbw1-pooler.c-3.us-east-1.aws.neon.tech/center_management?sslmode=require&channel_binding=require
+    username: neondb_owner
+    password: npg_iKtPJ8uXb4zE
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
