@@ -1,0 +1,63 @@
+{
+  "info": {
+    "name": "Center Management API",
+    "_postman_id": "b24dccc279-center-management",
+    "description": "Collection for Center Management (students/courses/enrollments).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8082" },
+    { "key": "auth.username", "value": "admin" },
+    { "key": "auth.password", "value": "admin" }
+  ],
+  "item": [
+    {
+      "name": "Create Student",
+      "request": {
+        "auth": { "type": "basic", "basic": [ { "key": "username", "value": "{{auth.username}}" }, { "key": "password", "value": "{{auth.password}}" } ] },
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"dob\": \"2000-01-01\",\n  \"hometown\": \"Hanoi\",\n  \"province\": \"HN\"\n}"
+        },
+        "url": { "raw": "{{base_url}}/api/students", "host": ["{{base_url}}"], "path": ["api","students"] }
+      }
+    },
+    {
+      "name": "Create Course",
+      "request": {
+        "auth": { "type": "basic", "basic": [ { "key": "username", "value": "{{auth.username}}" }, { "key": "password", "value": "{{auth.password}}" } ] },
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Java 101\",\n  \"startDate\": \"2025-12-01\",\n  \"endDate\": \"2025-12-31\",\n  \"content\": \"Course content here\"\n}"
+        },
+        "url": { "raw": "{{base_url}}/api/courses", "host": ["{{base_url}}"], "path": ["api","courses"] }
+      }
+    },
+    {
+      "name": "Create Enrollment",
+      "request": {
+        "auth": { "type": "basic", "basic": [ { "key": "username", "value": "{{auth.username}}" }, { "key": "password", "value": "{{auth.password}}" } ] },
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentId\": 1,\n  \"courseId\": 1\n}"
+        },
+        "url": { "raw": "{{base_url}}/api/enrollments", "host": ["{{base_url}}"], "path": ["api","enrollments"] }
+      }
+    },
+    {
+      "name": "List Enrollments",
+      "request": {
+        "auth": { "type": "basic", "basic": [ { "key": "username", "value": "{{auth.username}}" }, { "key": "password", "value": "{{auth.password}}" } ] },
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/enrollments", "host": ["{{base_url}}"], "path": ["api","enrollments"] }
+      }
+    }
+  ]
+}
