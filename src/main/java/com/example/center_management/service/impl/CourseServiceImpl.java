@@ -83,16 +83,16 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     public void delete(Long id) {
         // ❗ Soft delete: không xóa khỏi DB, chỉ INACTIVE
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
         // Nếu muốn, có thể check xem đã INACTIVE chưa
-        if ("INACTIVE".equalsIgnoreCase(student.getStatus())) {
+        if ("INACTIVE".equalsIgnoreCase(course.getStatus())) {
             return; // hoặc throw exception tùy nghiệp vụ
         }
 
-        student.setStatus("INACTIVE");
-        studentRepository.save(student);
+        course.setStatus("INACTIVE");
+        courseRepository.save(course);
     }
     private void validateDates(LocalDate start, LocalDate end) {
         if (end.isBefore(start)) {
