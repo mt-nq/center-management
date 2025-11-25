@@ -11,7 +11,7 @@ import lombok.Setter;
 public class StudentResponse {
 
     private Long id;
-    private String code;
+    private String studentCode;
     private String fullName;
     private LocalDate dob;
     private String hometown;

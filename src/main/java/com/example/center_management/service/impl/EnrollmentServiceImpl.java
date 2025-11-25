@@ -1,9 +1,8 @@
 package com.example.center_management.service.impl;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
+import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,14 +10,20 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.center_management.domain.entity.Course;
 import com.example.center_management.domain.entity.Enrollment;
 import com.example.center_management.domain.entity.Student;
+import com.example.center_management.domain.entity.Certificate;
+import com.example.center_management.domain.enums.CertificateResult;
+import com.example.center_management.domain.enums.EnrollmentStatus;
+import com.example.center_management.dto.enrollment.EnrollmentCompletionResponse;
 import com.example.center_management.dto.request.EnrollmentCreateRequest;
 import com.example.center_management.dto.request.EnrollmentResultUpdateRequest;
-import com.example.center_management.dto.response.CertificateResponse;
+import com.example.center_management.dto.certificate.CertificateResponse;
 import com.example.center_management.dto.response.EnrollmentResponse;
+import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.exception.ResourceNotFoundException;
 import com.example.center_management.repository.CourseRepository;
 import com.example.center_management.repository.EnrollmentRepository;
 import com.example.center_management.repository.StudentRepository;
+import com.example.center_management.service.CertificateService;
 import com.example.center_management.service.EnrollmentService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,7 +35,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
+    private final CertificateService certificateService;
 
+    // ================== ENROLL HỌC VIÊN ==================
     @Override
     @Transactional
     public EnrollmentResponse enroll(EnrollmentCreateRequest request) {
@@ -43,7 +50,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment enrollment = Enrollment.builder()
                 .student(student)
                 .course(course)
-                .status("ENROLLED")
+                .status(EnrollmentStatus.IN_PROGRESS)   // trước đây là "ENROLLED" (String)
                 .enrolledAt(LocalDateTime.now())
                 .build();
 
@@ -51,6 +58,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return toEnrollmentResponse(saved);
     }
 
+    // ================== LẤY DANH SÁCH ENROLLMENT ==================
     @Override
     @Transactional(readOnly = true)
     public List<EnrollmentResponse> getAll() {
@@ -70,69 +78,110 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .toList();
     }
 
+    // ================== CẬP NHẬT KẾT QUẢ CHỨNG CHỈ ==================
+    /**
+     * Thiết kế mới:
+     * - Không còn result / certificateCode / certificateIssuedAt trong Enrollment.
+     * - Chứng chỉ được tách sang bảng Certificate.
+     * - Ở đây ta chỉ chuyển request (passed = true/false) thành PASS/FAIL
+     *   rồi gọi sang CertificateService.issueCertificate(...)
+     */
     @Override
     @Transactional
     public CertificateResponse updateResult(Long enrollmentId, EnrollmentResultUpdateRequest request) {
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
-
         boolean passed = Boolean.TRUE.equals(request.getPassed());
-        String result = passed ? "PASSED" : "FAILED";
-        enrollment.setResult(result);
+        CertificateResult result = passed ? CertificateResult.PASS : CertificateResult.FAIL;
+        // Logic kiểm tra COMPLETED và tạo certificate nằm trong CertificateServiceImpl
+        return certificateService.issueCertificate(enrollmentId, result);
+    }
 
-        if (passed) {
-            if (enrollment.getCertificateCode() == null) {
-                enrollment.setCertificateCode(generateCertificateCode());
-                enrollment.setCertificateIssuedAt(LocalDateTime.now());
-            }
+    // ================== LẤY DANH SÁCH HỌC SINH CHƯA TỪNG ĐĂNG KÝ ==================
+    @Override
+    @Transactional(readOnly = true)
+    public List<StudentResponse> getStudentsNotEnrolled() {
+        List<Student> students = studentRepository.findStudentsWithoutAnyEnrollment();
+        return students.stream()
+                .map(this::toStudentResponse)
+                .toList();
+    }
+
+    private StudentResponse toStudentResponse(Student student) {
+        StudentResponse dto = new StudentResponse();
+        dto.setId(student.getId());
+
+        // DTO dùng field studentCode, entity dùng field code
+        dto.setStudentCode(student.getCode());
+
+        dto.setFullName(student.getFullName());
+        dto.setDob(student.getDob());
+        dto.setHometown(student.getHometown());
+        dto.setProvince(student.getProvince());
+        dto.setStatus(student.getStatus());
+
+        return dto;
+    }
+
+    // ================== MAP ENROLLMENT → DTO ==================
+    private EnrollmentResponse toEnrollmentResponse(Enrollment e) {
+        EnrollmentResponse res = new EnrollmentResponse();
+        res.setId(e.getId());
+
+        // Student
+        res.setStudentId(e.getStudent().getId());
+        res.setStudentCode(e.getStudent().getCode());
+        res.setStudentName(e.getStudent().getFullName());
+
+        // Course
+        res.setCourseId(e.getCourse().getId());
+        res.setCourseCode(e.getCourse().getCode());
+        res.setCourseTitle(e.getCourse().getTitle());
+
+        // Enrollment info
+        res.setEnrolledAt(e.getEnrolledAt());
+
+        // Thông tin chứng chỉ (nếu đã có Certificate)
+        Certificate cert = e.getCertificate();
+        if (cert != null) {
+            // Giả sử EnrollmentResponse có field result (String) & certificateNo
+            res.setResult(cert.getResult() != null ? cert.getResult().name() : null);
+            res.setCertificateNo(cert.getCertificateNo());
         } else {
-            enrollment.setCertificateCode(null);
-            enrollment.setCertificateIssuedAt(null);
+            res.setResult(null);
+            res.setCertificateNo(null);
         }
 
-        Enrollment saved = enrollmentRepository.save(enrollment);
-        return toCertificateResponse(saved);
-    }
-
-    private String generateCertificateCode() {
-        int year = LocalDate.now().getYear();
-        String random = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        return String.format("CERT-%d-%s", year, random);
-    }
-
-private EnrollmentResponse toEnrollmentResponse(Enrollment e) {
-    EnrollmentResponse res = new EnrollmentResponse();
-    res.setId(e.getId());
-
-    // Student
-    res.setStudentId(e.getStudent().getId());
-    res.setStudentCode(e.getStudent().getCode());
-    res.setStudentName(e.getStudent().getFullName());
-
-    // Course
-    res.setCourseId(e.getCourse().getId());
-    res.setCourseCode(e.getCourse().getCode());
-    res.setCourseTitle(e.getCourse().getTitle());
-
-    // Enrollment info
-    res.setEnrolledAt(e.getEnrolledAt());
-    res.setResult(e.getResult());                    // null lúc mới enroll là đúng
-    res.setCertificateNo(e.getCertificateCode());    // map từ certificateCode trong entity
-
-    return res;
-}
-
-    private CertificateResponse toCertificateResponse(Enrollment e) {
-        CertificateResponse res = new CertificateResponse();
-        res.setEnrollmentId(e.getId());
-        res.setStudentId(e.getStudent().getId());
-        res.setStudentName(e.getStudent().getFullName());
-        res.setCourseId(e.getCourse().getId());
-        // tương tự: sửa cho khớp field trong Course
-        res.setCourseName(e.getCourse().getContent());
-        res.setResult(e.getResult());
-        res.setCertificateCode(e.getCertificateCode());
-        res.setIssuedAt(e.getCertificateIssuedAt());
         return res;
+    }
+
+    // ================== CHECK & UPDATE COMPLETION STATUS ==================
+    @Override
+    @Transactional(readOnly = true)
+    public EnrollmentCompletionResponse checkCompletion(Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new NoSuchElementException("Enrollment not found"));
+
+        boolean completed = enrollment.getStatus() == EnrollmentStatus.COMPLETED;
+
+        return new EnrollmentCompletionResponse(
+                enrollment.getId(),
+                enrollment.getStudent().getId(),
+                enrollment.getCourse().getId(),
+                completed
+        );
+    }
+
+    @Override
+    @Transactional
+    public void updateCompletionStatus(Long enrollmentId, boolean completed) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new NoSuchElementException("Enrollment not found"));
+
+        if (completed) {
+            enrollment.setStatus(EnrollmentStatus.COMPLETED);
+            enrollment.setCompletedAt(LocalDateTime.now());
+        } else {
+            enrollment.setStatus(EnrollmentStatus.NOT_COMPLETED);
+            enrollment.setCompletedAt(null);
+        }
     }
 }

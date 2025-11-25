@@ -7,12 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.center_management.domain.entity.Course;
+import com.example.center_management.domain.entity.Student;
 import com.example.center_management.dto.request.CourseCreateRequest;
 import com.example.center_management.dto.request.CourseUpdateRequest;
 import com.example.center_management.dto.response.CourseResponse;
 import com.example.center_management.exception.BadRequestException;
 import com.example.center_management.exception.ResourceNotFoundException;
 import com.example.center_management.repository.CourseRepository;
+import com.example.center_management.repository.StudentRepository;
 import com.example.center_management.service.CourseService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
+    
+    private final StudentRepository studentRepository;
 
     @Override
     @Transactional
@@ -75,15 +79,21 @@ public class CourseServiceImpl implements CourseService {
         return toResponse(course);
     }
 
-@Override
-@Transactional
-public void delete(Long id) {
-    if (!courseRepository.existsById(id)) {
-        throw new ResourceNotFoundException("Course not found");
-    }
-    courseRepository.deleteById(id);
-}
+  @Override
+    @Transactional
+    public void delete(Long id) {
+        // ❗ Soft delete: không xóa khỏi DB, chỉ INACTIVE
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
+        // Nếu muốn, có thể check xem đã INACTIVE chưa
+        if ("INACTIVE".equalsIgnoreCase(student.getStatus())) {
+            return; // hoặc throw exception tùy nghiệp vụ
+        }
+
+        student.setStatus("INACTIVE");
+        studentRepository.save(student);
+    }
     private void validateDates(LocalDate start, LocalDate end) {
         if (end.isBefore(start)) {
             throw new BadRequestException("End date must be after start date");

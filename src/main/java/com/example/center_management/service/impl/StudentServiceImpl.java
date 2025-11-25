@@ -24,6 +24,9 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Override
     @Transactional
     public StudentResponse create(StudentCreateRequest request) {
@@ -38,7 +41,7 @@ public class StudentServiceImpl implements StudentService {
         student.setCode(generateStudentCode());
 
         Student saved = studentRepository.save(student);
-        return toResponse(saved);
+        return toStudentResponse(saved);
     }
 
     @Override
@@ -46,17 +49,17 @@ public class StudentServiceImpl implements StudentService {
     public StudentResponse getById(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-        return toResponse(student);
+        return toStudentResponse(student);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<StudentResponse> getAll() {
         return studentRepository.findAll()
-            .stream()
-            .filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus()))
-            .map(this::toResponse)
-            .toList();
+                .stream()
+                .filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus()))
+                .map(this::toStudentResponse)
+                .toList();
     }
 
     @Override
@@ -70,40 +73,36 @@ public class StudentServiceImpl implements StudentService {
         student.setHometown(request.getHometown());
         student.setProvince(request.getProvince());
 
-        return toResponse(student);
+        Student saved = studentRepository.save(student);
+        return toStudentResponse(saved);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!studentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Student not found");
-        }
-        studentRepository.deleteById(id);
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+        // Soft delete: chỉ đổi trạng thái
+        student.setStatus("INACTIVE");
+        studentRepository.save(student);
     }
 
-@Autowired
-private JdbcTemplate jdbcTemplate;
+    private String generateStudentCode() {
+        int year = LocalDate.now().getYear();
+        Long nextVal = jdbcTemplate.queryForObject("SELECT nextval('student_seq')", Long.class);
+        return String.format("STU-%d-%04d", year, nextVal);
+    }
 
-private String generateStudentCode() {
-    int year = LocalDate.now().getYear();
-    Long nextVal = jdbcTemplate.queryForObject("SELECT nextval('student_seq')", Long.class);
-    return String.format("STU-%d-%04d", year, nextVal);
-}
-    private StudentResponse toResponse(Student s) {
+    private StudentResponse toStudentResponse(Student student) {
         StudentResponse res = new StudentResponse();
-        res.setId(s.getId());
-        res.setCode(s.getCode());
-        res.setFullName(s.getFullName());
-        res.setDob(s.getDob());
-        res.setHometown(s.getHometown());
-        res.setProvince(s.getProvince());
-        res.setStatus(s.getStatus());
-        res.setCreatedAt(s.getCreatedAt());
-        res.setUpdatedAt(s.getUpdatedAt());
-
+        res.setId(student.getId());
+        res.setStudentCode(student.getCode());
+        res.setFullName(student.getFullName());
+        res.setDob(student.getDob());
+        res.setHometown(student.getHometown());
+        res.setProvince(student.getProvince());
+        res.setStatus(student.getStatus());
         return res;
     }
-
-    
 }
