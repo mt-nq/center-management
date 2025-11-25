@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,13 +63,35 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     // ================== LẤY DANH SÁCH ENROLLMENT ==================
     @Override
-    @Transactional(readOnly = true)
-    public List<EnrollmentResponse> getAll() {
-        return enrollmentRepository.findAll()
-                .stream()
-                .map(this::toEnrollmentResponse)
-                .toList();
+@Transactional(readOnly = true)
+public Page<EnrollmentResponse> getAll(int page, int size) {
+    List<EnrollmentResponse> allEnrollments = enrollmentRepository.findAll()
+            .stream()
+            .map(this::toEnrollmentResponse)
+            .toList();
+
+    int total = allEnrollments.size();
+    int fromIndex = page * size;
+
+    if (fromIndex >= total) {
+        // nếu page quá lớn, trả về trang rỗng
+        return new PageImpl<>(
+                List.of(),
+                PageRequest.of(page, size),
+                total
+        );
     }
+
+    int toIndex = Math.min(fromIndex + size, total);
+    List<EnrollmentResponse> pageContent = allEnrollments.subList(fromIndex, toIndex);
+
+    return new PageImpl<>(
+            pageContent,
+            PageRequest.of(page, size),
+            total
+    );
+}
+
 
     @Override
     @Transactional(readOnly = true)

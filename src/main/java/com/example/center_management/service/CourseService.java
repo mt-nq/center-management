@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.center_management.dto.request.CourseCreateRequest;
 import com.example.center_management.dto.request.CourseUpdateRequest;
 import com.example.center_management.dto.response.CourseResponse;
+import org.springframework.data.domain.Page;
 
 public interface CourseService {
 
@@ -12,9 +13,9 @@ public interface CourseService {
 
     CourseResponse getById(Long id);
 
-    List<CourseResponse> getAll();
-
     CourseResponse update(Long id, CourseUpdateRequest request);
 
     void delete(Long id);
+
+    Page<CourseResponse> getAll(int page, int size);
 }

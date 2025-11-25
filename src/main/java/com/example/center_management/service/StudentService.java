@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.center_management.dto.request.StudentCreateRequest;
 import com.example.center_management.dto.request.StudentUpdateRequest;
 import com.example.center_management.dto.response.StudentResponse;
+import org.springframework.data.domain.Page;
 
 public interface StudentService {
 
@@ -12,10 +13,10 @@ public interface StudentService {
 
     StudentResponse getById(Long id);
 
-    List<StudentResponse> getAll();
-
     StudentResponse update(Long id, StudentUpdateRequest request);
 
     void delete(Long id);
+
+    Page<StudentResponse> getAll(int page, int size);
     
 }

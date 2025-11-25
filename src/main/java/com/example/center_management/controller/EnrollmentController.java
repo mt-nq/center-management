@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
 
 import com.example.center_management.dto.enrollment.EnrollmentCompletionResponse;
 import com.example.center_management.dto.enrollment.UpdateCompletionStatusRequest;
@@ -43,9 +45,11 @@ public CertificateResponse update(
 }
 
 
-    @GetMapping
-    public List<EnrollmentResponse> getAll() {
-        return enrollmentService.getAll();
+    public Page<EnrollmentResponse> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        return enrollmentService.getAll(page, size);
     }
 
     @GetMapping("/by-student/{studentId}")

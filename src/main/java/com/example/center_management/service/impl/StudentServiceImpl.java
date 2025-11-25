@@ -4,9 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
 
 import com.example.center_management.domain.entity.Student;
 import com.example.center_management.dto.request.StudentCreateRequest;
@@ -54,12 +57,33 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<StudentResponse> getAll() {
-        return studentRepository.findAll()
+    public Page<StudentResponse> getAll(int page, int size) {
+
+        List<StudentResponse> allActiveStudents = studentRepository.findAll()
                 .stream()
                 .filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus()))
                 .map(this::toStudentResponse)
                 .toList();
+
+        int total = allActiveStudents.size();
+        int fromIndex = page * size;
+
+        if (fromIndex >= total) {
+            return new PageImpl<>(
+                    List.of(),
+                    PageRequest.of(page, size),
+                    total
+            );
+        }
+
+        int toIndex = Math.min(fromIndex + size, total);
+        List<StudentResponse> pageContent = allActiveStudents.subList(fromIndex, toIndex);
+
+        return new PageImpl<>(
+                pageContent,
+                PageRequest.of(page, size),
+                total
+        );
     }
 
     @Override

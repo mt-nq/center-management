@@ -3,6 +3,9 @@ package com.example.center_management.service.impl;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +14,7 @@ import com.example.center_management.domain.entity.Student;
 import com.example.center_management.dto.request.CourseCreateRequest;
 import com.example.center_management.dto.request.CourseUpdateRequest;
 import com.example.center_management.dto.response.CourseResponse;
+import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.exception.BadRequestException;
 import com.example.center_management.exception.ResourceNotFoundException;
 import com.example.center_management.repository.CourseRepository;
@@ -54,14 +58,37 @@ public class CourseServiceImpl implements CourseService {
         return toResponse(course);
     }
 
-    @Override
+@Override
     @Transactional(readOnly = true)
-    public List<CourseResponse> getAll() {
-        return courseRepository.findAll()
+    public Page<CourseResponse> getAll(int page, int size) {
+
+        List<CourseResponse> allActiveCourses = courseRepository.findAll()
                 .stream()
+                .filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus()))
                 .map(this::toResponse)
                 .toList();
+
+        int total = allActiveCourses.size();
+        int fromIndex = page * size;
+
+        if (fromIndex >= total) {
+            return new PageImpl<>(
+                    List.of(),
+                    PageRequest.of(page, size),
+                    total
+            );
+        }
+
+        int toIndex = Math.min(fromIndex + size, total);
+        List<CourseResponse> pageContent = allActiveCourses.subList(fromIndex, toIndex);
+
+        return new PageImpl<>(
+                pageContent,
+                PageRequest.of(page, size),
+                total
+        );
     }
+
 
     @Override
     @Transactional

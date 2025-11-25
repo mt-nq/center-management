@@ -25,4 +25,6 @@ public class CertificateController {
         CertificateResult result = request.getResult();
         return certificateService.issueCertificate(enrollmentId, result);
     }
+
+    
 }
