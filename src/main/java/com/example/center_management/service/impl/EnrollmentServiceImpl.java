@@ -36,7 +36,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public EnrollmentResponse enroll(EnrollmentCreateRequest request) {
         Student student = studentRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
@@ -100,39 +99,54 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return String.format("CERT-%d-%s", year, random);
     }
 
-private EnrollmentResponse toEnrollmentResponse(Enrollment e) {
-    EnrollmentResponse res = new EnrollmentResponse();
-    res.setId(e.getId());
+    private EnrollmentResponse toEnrollmentResponse(Enrollment e) {
+        EnrollmentResponse res = new EnrollmentResponse();
+        res.setId(e.getId());
 
-    // Student
-    res.setStudentId(e.getStudent().getId());
-    res.setStudentCode(e.getStudent().getCode());
-    res.setStudentName(e.getStudent().getFullName());
+        // Student
+        if (e.getStudent() != null) {
+            res.setStudentId(e.getStudent().getId());
+            res.setStudentCode(e.getStudent().getCode()); // SỬA LẠI
+            res.setStudentName(e.getStudent().getFullName());
+        }
 
-    // Course
-    res.setCourseId(e.getCourse().getId());
-    res.setCourseCode(e.getCourse().getCode());
-    res.setCourseTitle(e.getCourse().getTitle());
+        // Course
+        if (e.getCourse() != null) {
+            res.setCourseId(e.getCourse().getId());
+            res.setCourseCode(e.getCourse().getCode()); // SỬA LẠI
+            res.setCourseTitle(e.getCourse().getTitle());
+        }
 
-    // Enrollment info
-    res.setEnrolledAt(e.getEnrolledAt());
-    res.setResult(e.getResult());                    // null lúc mới enroll là đúng
-    res.setCertificateNo(e.getCertificateCode());    // map từ certificateCode trong entity
+        res.setEnrolledAt(e.getEnrolledAt());
+        res.setResult(e.getResult());
+        res.setCertificateNo(e.getCertificateCode());
 
-    return res;
-}
+        return res;
+    }
 
     private CertificateResponse toCertificateResponse(Enrollment e) {
         CertificateResponse res = new CertificateResponse();
         res.setEnrollmentId(e.getId());
-        res.setStudentId(e.getStudent().getId());
-        res.setStudentName(e.getStudent().getFullName());
-        res.setCourseId(e.getCourse().getId());
-        // tương tự: sửa cho khớp field trong Course
-        res.setCourseName(e.getCourse().getContent());
+
+        // Student
+        if (e.getStudent() != null) {
+            res.setStudentId(e.getStudent().getId());
+            res.setStudentCode(e.getStudent().getCode()); // SỬA LẠI
+            res.setStudentName(e.getStudent().getFullName());
+        }
+
+        // Course
+        if (e.getCourse() != null) {
+            res.setCourseId(e.getCourse().getId());
+            res.setCourseCode(e.getCourse().getCode()); // SỬA LẠI
+            res.setCourseName(e.getCourse().getTitle());
+        }
+
         res.setResult(e.getResult());
         res.setCertificateCode(e.getCertificateCode());
-        res.setIssuedAt(e.getCertificateIssuedAt());
+        res.setIssuedAt(e.getCertificateIssuedAt() != null ? e.getCertificateIssuedAt().toLocalDate() : null);
+
+
         return res;
     }
 }

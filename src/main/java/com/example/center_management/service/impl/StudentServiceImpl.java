@@ -24,6 +24,10 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    // create
     @Override
     @Transactional
     public StudentResponse create(StudentCreateRequest request) {
@@ -36,11 +40,11 @@ public class StudentServiceImpl implements StudentService {
                 .build();
 
         student.setCode(generateStudentCode());
-
         Student saved = studentRepository.save(student);
         return toResponse(saved);
     }
 
+    // get by id
     @Override
     @Transactional(readOnly = true)
     public StudentResponse getById(Long id) {
@@ -49,16 +53,18 @@ public class StudentServiceImpl implements StudentService {
         return toResponse(student);
     }
 
+    // getall
     @Override
     @Transactional(readOnly = true)
     public List<StudentResponse> getAll() {
         return studentRepository.findAll()
-            .stream()
-            .filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus()))
-            .map(this::toResponse)
-            .toList();
+                .stream()
+                .filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus()))
+                .map(this::toResponse)
+                .toList();
     }
 
+    // update
     @Override
     @Transactional
     public StudentResponse update(Long id, StudentUpdateRequest request) {
@@ -73,23 +79,24 @@ public class StudentServiceImpl implements StudentService {
         return toResponse(student);
     }
 
+// detele
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!studentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Student not found");
-        }
-        studentRepository.deleteById(id);
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+        // Soft delete: chỉ đổi status, không xóa record
+        student.setStatus("INACTIVE");
+        studentRepository.save(student);
     }
 
-@Autowired
-private JdbcTemplate jdbcTemplate;
+    private String generateStudentCode() {
+        int year = LocalDate.now().getYear();
+        Long nextVal = jdbcTemplate.queryForObject("SELECT nextval('student_seq')", Long.class);
+        return String.format("STU-%d-%04d", year, nextVal);
+    }
 
-private String generateStudentCode() {
-    int year = LocalDate.now().getYear();
-    Long nextVal = jdbcTemplate.queryForObject("SELECT nextval('student_seq')", Long.class);
-    return String.format("STU-%d-%04d", year, nextVal);
-}
     private StudentResponse toResponse(Student s) {
         StudentResponse res = new StudentResponse();
         res.setId(s.getId());
@@ -101,9 +108,6 @@ private String generateStudentCode() {
         res.setStatus(s.getStatus());
         res.setCreatedAt(s.getCreatedAt());
         res.setUpdatedAt(s.getUpdatedAt());
-
         return res;
     }
-
-    
 }
