@@ -53,7 +53,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment enrollment = Enrollment.builder()
                 .student(student)
                 .course(course)
-                .status(EnrollmentStatus.IN_PROGRESS)   // trước đây là "ENROLLED" (String)
+                .status(EnrollmentStatus.ENROLLED)   
                 .enrolledAt(LocalDateTime.now())
                 .build();
 

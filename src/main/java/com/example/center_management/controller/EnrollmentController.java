@@ -44,7 +44,7 @@ public CertificateResponse update(
     return enrollmentService.updateResult(id, request);
 }
 
-
+@GetMapping
     public Page<EnrollmentResponse> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
