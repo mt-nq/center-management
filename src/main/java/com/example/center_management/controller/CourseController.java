@@ -1,27 +1,12 @@
 package com.example.center_management.controller;
 
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 
-import com.example.center_management.dto.request.CourseCreateRequest;
-import com.example.center_management.dto.request.CourseUpdateRequest;
 import com.example.center_management.dto.response.CourseResponse;
+import com.example.center_management.dto.response.CourseStructureResponse;
 import com.example.center_management.service.CourseService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,16 +16,7 @@ public class CourseController {
 
     private final CourseService courseService;
 
-    @PostMapping
-    public CourseResponse create(@Valid @RequestBody CourseCreateRequest request) {
-        return courseService.create(request);
-    }
-
-    @GetMapping("/{id}")
-    public CourseResponse getById(@PathVariable Long id) {
-        return courseService.getById(id);
-    }
-
+    // Lấy danh sách khóa học (Public/Student) – có phân trang
     @GetMapping
     public Page<CourseResponse> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -49,17 +25,15 @@ public class CourseController {
         return courseService.getAll(page, size);
     }
 
-    @PutMapping("/{id}")
-    public CourseResponse update(
-            @PathVariable Long id,
-            @Valid @RequestBody CourseUpdateRequest request
-    ) {
-        return courseService.update(id, request);
+    // Lấy chi tiết 1 khóa học theo id
+    @GetMapping("/{id}")
+    public CourseResponse getById(@PathVariable Long id) {
+        return courseService.getById(id);
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        courseService.delete(id);
+    // Lấy chi tiết lộ trình (chapters -> lessons) của khóa học
+    @GetMapping("/{id}/structure")
+    public CourseStructureResponse getStructure(@PathVariable Long id) {
+        return courseService.getStructure(id);
     }
 }

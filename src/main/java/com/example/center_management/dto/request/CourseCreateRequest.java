@@ -3,7 +3,6 @@ package com.example.center_management.dto.request;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,12 +11,11 @@ import lombok.Setter;
 public class CourseCreateRequest {
 
     @NotBlank
-    private String title;
+    private String title;      // bắt buộc có tên khóa học
 
-    @NotNull
+    // Có thể null, chỉ validate nếu cả startDate & endDate đều khác null
     private LocalDate startDate;
 
-    @NotNull
     private LocalDate endDate;
 
     private String content;

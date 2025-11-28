@@ -2,16 +2,13 @@ package com.example.center_management.domain.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,14 +41,20 @@ public class Course {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    // Nội dung mô tả khoá học
     private String content;
 
     @Column(length = 20)
-    private String status; // ACTIVE/INACTIVE
+    private String status; // ACTIVE / INACTIVE
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    // ===== RELATIONSHIP: COURSE -> CHAPTER =====
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Chapter> chapters = new ArrayList<>();
 }
