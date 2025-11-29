@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +54,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment enrollment = Enrollment.builder()
                 .student(student)
                 .course(course)
-                .status(EnrollmentStatus.IN_PROGRESS)   // trước đây là "ENROLLED" (String)
+                .status(EnrollmentStatus.ENROLLED)
                 .enrolledAt(LocalDateTime.now())
                 .build();
 
@@ -61,55 +62,47 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return toEnrollmentResponse(saved);
     }
 
-    // ================== LẤY DANH SÁCH ENROLLMENT ==================
+    // ================== LẤY DANH SÁCH ENROLLMENT (FIX LỖI VÀ TỐI ƯU PHÂN TRANG) ==================
+    /**
+     * FIX: Thêm tham số `sortBy` để khớp với chữ ký phương thức trong
+     * EnrollmentService và sử dụng phân trang của Spring Data JPA thay vì phân
+     * trang thủ công.
+     */
     @Override
-@Transactional(readOnly = true)
-public Page<EnrollmentResponse> getAll(int page, int size) {
-    List<EnrollmentResponse> allEnrollments = enrollmentRepository.findAll()
-            .stream()
-            .map(this::toEnrollmentResponse)
-            .toList();
+    @Transactional(readOnly = true)
+    public Page<EnrollmentResponse> getAll(int page, int size, String sortBy) { // <--- ĐÃ FIX LỖI BIÊN DỊCH
+        // Định nghĩa phân trang và sắp xếp
+        // Mặc định sắp xếp theo ID nếu sortBy là null hoặc rỗng
+        String sortField = (sortBy != null && !sortBy.isEmpty()) ? sortBy : "id";
 
-    int total = allEnrollments.size();
-    int fromIndex = page * size;
+        // Tạo Pageable object (PageRequest)
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortField).descending());
 
-    if (fromIndex >= total) {
-        // nếu page quá lớn, trả về trang rỗng
-        return new PageImpl<>(
-                List.of(),
-                PageRequest.of(page, size),
-                total
-        );
+        // Sử dụng findAll(Pageable) của Spring Data JPA để phân trang hiệu quả
+        Page<Enrollment> enrollmentPage = enrollmentRepository.findAll(pageable);
+
+        // Chuyển đổi Page<Enrollment> sang Page<EnrollmentResponse>
+        return enrollmentPage.map(this::toEnrollmentResponse);
     }
-
-    int toIndex = Math.min(fromIndex + size, total);
-    List<EnrollmentResponse> pageContent = allEnrollments.subList(fromIndex, toIndex);
-
-    return new PageImpl<>(
-            pageContent,
-            PageRequest.of(page, size),
-            total
-    );
-}
-
 
     @Override
     @Transactional(readOnly = true)
     public List<EnrollmentResponse> getByStudent(Long studentId) {
-        return enrollmentRepository.findAll()
-                .stream()
-                .filter(e -> e.getStudent().getId().equals(studentId))
+        // Tối ưu hóa: Thay vì findAll() rồi filter, nên dùng phương thức Repository
+        // Giả định EnrollmentRepository có phương thức findByStudent_Id(Long studentId)
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentId(studentId);
+
+        return enrollments.stream()
                 .map(this::toEnrollmentResponse)
                 .toList();
     }
 
     // ================== CẬP NHẬT KẾT QUẢ CHỨNG CHỈ ==================
     /**
-     * Thiết kế mới:
-     * - Không còn result / certificateCode / certificateIssuedAt trong Enrollment.
-     * - Chứng chỉ được tách sang bảng Certificate.
-     * - Ở đây ta chỉ chuyển request (passed = true/false) thành PASS/FAIL
-     *   rồi gọi sang CertificateService.issueCertificate(...)
+     * Thiết kế mới: - Không còn result / certificateCode / certificateIssuedAt
+     * trong Enrollment. - Chứng chỉ được tách sang bảng Certificate. - Ở đây ta
+     * chỉ chuyển request (passed = true/false) thành PASS/FAIL rồi gọi sang
+     * CertificateService.issueCertificate(...)
      */
     @Override
     @Transactional

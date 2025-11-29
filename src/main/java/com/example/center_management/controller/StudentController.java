@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 
 import com.example.center_management.dto.request.StudentCreateRequest;
 import com.example.center_management.dto.request.StudentUpdateRequest;
+import com.example.center_management.dto.response.PaginationResponse;
 import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.service.StudentService;
 
@@ -40,11 +41,21 @@ public class StudentController {
     }
 
     @GetMapping
-    public Page<StudentResponse> getAll(
+    public ResponseEntity<?> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ) {
-        return studentService.getAll(page, size);
+        Page<StudentResponse> result = studentService.getAll(page, size);
+
+        return ResponseEntity.ok().body(
+                new PaginationResponse<>(
+                        result.getContent(),
+                        result.getNumber(),
+                        result.getSize(),
+                        result.getTotalPages(),
+                        result.getTotalElements()
+                )
+        );
     }
 
     @PutMapping("/{id}")

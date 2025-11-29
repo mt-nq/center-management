@@ -1,7 +1,5 @@
 package com.example.center_management.service;
 
-import java.util.List;
-
 import com.example.center_management.dto.request.CourseCreateRequest;
 import com.example.center_management.dto.request.CourseUpdateRequest;
 import com.example.center_management.dto.response.CourseResponse;
@@ -17,5 +15,5 @@ public interface CourseService {
 
     void delete(Long id);
 
-    Page<CourseResponse> getAll(int page, int size);
+    Page<CourseResponse> getAll(int page, int size, String search, String status);
 }

@@ -36,32 +36,34 @@ public class EnrollmentController {
         return enrollmentService.enroll(request);
     }
 
-@PutMapping("/{id}/certificate")
-public CertificateResponse update(
-        @PathVariable Long id,
-        @RequestBody EnrollmentResultUpdateRequest request
-) {
-    return enrollmentService.updateResult(id, request);
-}
+    @PutMapping("/{id}/certificate")
+    public CertificateResponse update(
+            @PathVariable Long id,
+            @RequestBody EnrollmentResultUpdateRequest request
+    ) {
+        return enrollmentService.updateResult(id, request);
+    }
 
-
+    @GetMapping
     public Page<EnrollmentResponse> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String sortBy
     ) {
-        return enrollmentService.getAll(page, size);
+        return enrollmentService.getAll(page, size, sortBy);
     }
 
     @GetMapping("/by-student/{studentId}")
     public List<EnrollmentResponse> getByStudent(@PathVariable Long studentId) {
         return enrollmentService.getByStudent(studentId);
     }
+
     @GetMapping("/unregistered-students")
     public List<StudentResponse> getUnregisteredStudents() {
         return enrollmentService.getStudentsNotEnrolled();
     }
 
-     // API xem học viên đã hoàn thành khóa chưa
+    // API xem học viên đã hoàn thành khóa chưa
     @GetMapping("/{id}/completion-status")
     public EnrollmentCompletionResponse getCompletionStatus(@PathVariable("id") Long enrollmentId) {
         return enrollmentService.checkCompletion(enrollmentId);

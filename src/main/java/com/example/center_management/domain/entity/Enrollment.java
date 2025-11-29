@@ -35,7 +35,7 @@ public class Enrollment {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private EnrollmentStatus status; // IN_PROGRESS / COMPLETED / NOT_COMPLETED
+    private EnrollmentStatus status; // ENROLLED / COMPLETED / NOT_COMPLETED
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;

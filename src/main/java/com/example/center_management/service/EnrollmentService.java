@@ -8,11 +8,14 @@ import com.example.center_management.dto.request.EnrollmentResultUpdateRequest;
 import com.example.center_management.dto.certificate.CertificateResponse;
 import com.example.center_management.dto.response.EnrollmentResponse;
 import com.example.center_management.dto.response.StudentResponse;
+
 import org.springframework.data.domain.Page;
 
 public interface EnrollmentService {
 
     EnrollmentResponse enroll(EnrollmentCreateRequest request);
+
+    Page<EnrollmentResponse> getAll(int page, int size, String sortBy);
 
     List<EnrollmentResponse> getByStudent(Long studentId);
 
@@ -23,6 +26,4 @@ public interface EnrollmentService {
     EnrollmentCompletionResponse checkCompletion(Long enrollmentId);
 
     void updateCompletionStatus(Long enrollmentId, boolean completed);
-
-    Page<EnrollmentResponse> getAll(int page, int size);
 }
