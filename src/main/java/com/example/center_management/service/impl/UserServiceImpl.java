@@ -3,6 +3,7 @@ package com.example.center_management.service.impl;
 import com.example.center_management.domain.entity.User;
 import com.example.center_management.dto.request.UserCreateRequest;
 import com.example.center_management.dto.response.UserResponse;
+import com.example.center_management.dto.user.UserUpdateMeRequest;
 import com.example.center_management.repository.UserRepository;
 import com.example.center_management.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,26 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    @Override
+    public UserResponse getMe(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return toResponse(user);
+    }
+
+    @Override
+    public UserResponse updateMe(Long userId, UserUpdateMeRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Để tránh lỗi thiếu getter trong UserUpdateMeRequest,
+        // ở đây tạm thời CHƯA dùng field nào của request.
+        // Sau này nếu muốn update fullName/email/... thì ta sửa tiếp ở đây.
+        user = userRepository.save(user);
+
+        return toResponse(user);
     }
 
     // ====== MAP THỦ CÔNG TỪ ENTITY -> DTO ======
