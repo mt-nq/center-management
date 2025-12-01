@@ -3,9 +3,6 @@ package com.example.center_management.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Table(name = "chapters")
 @Getter
@@ -17,17 +14,16 @@ public class Chapter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, length = 255)
-    private String title; // tên chương
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
+    @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    // Quan hệ 1-n: Chapter -> Lesson
-    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Lesson> lessons = new ArrayList<>();
+    @Column(name = "chapter_name", length = 255, nullable = false)
+    private String chapterName;
+
+    // "order" là keyword nên map sang sortOrder, column thực vẫn là "order"
+    @Column(name = "\"order\"", nullable = false)
+    private Integer sortOrder;
 }

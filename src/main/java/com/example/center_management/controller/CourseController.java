@@ -16,7 +16,7 @@ public class CourseController {
 
     private final CourseService courseService;
 
-    // Lấy danh sách khóa học (Public/Student) – có phân trang
+    // GET /courses – Lấy danh sách tất cả khóa học (Public/Student) – 200
     @GetMapping
     public Page<CourseResponse> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -25,13 +25,13 @@ public class CourseController {
         return courseService.getAll(page, size);
     }
 
-    // Lấy chi tiết 1 khóa học theo id
+    // (Bonus) GET /courses/{id} – chi tiết course, không có trong bảng nhưng không sao
     @GetMapping("/{id}")
     public CourseResponse getById(@PathVariable Long id) {
         return courseService.getById(id);
     }
 
-    // Lấy chi tiết lộ trình (chapters -> lessons) của khóa học
+    // GET /courses/{id}/structure – Lấy chi tiết lộ trình (chapters -> lessons) – 200
     @GetMapping("/{id}/structure")
     public CourseStructureResponse getStructure(@PathVariable Long id) {
         return courseService.getStructure(id);

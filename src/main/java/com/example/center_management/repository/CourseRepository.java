@@ -1,8 +1,7 @@
 package com.example.center_management.repository;
 
+import com.example.center_management.domain.entity.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.center_management.domain.entity.Course;
-
-public interface CourseRepository extends JpaRepository<Course, Long> {
+public interface CourseRepository extends JpaRepository<Course, Integer> {
 }

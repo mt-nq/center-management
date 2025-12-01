@@ -1,0 +1,11 @@
+// LoginRequest.java
+package com.example.center_management.dto.request;
+
+import lombok.Data;
+
+@Data
+public class LoginRequest {
+
+    private String username;
+    private String password;
+}

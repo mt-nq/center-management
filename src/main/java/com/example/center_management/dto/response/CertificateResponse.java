@@ -1,26 +1,22 @@
+// CertificateResponse.java
 package com.example.center_management.dto.response;
 
-import java.time.LocalDateTime;
+import com.example.center_management.domain.enums.CertificateStatus;
+import lombok.Builder;
+import lombok.Data;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
+@Builder
 public class CertificateResponse {
 
-    private Long enrollmentId;
-
-    private Long studentId;
-    private String studentCode;
-    private String studentName;
-
-    private Long courseId;
-    private String courseCode;
-    // Đổi lại tùy field trong Course, ví dụ: name / title / content
+    private String certificateCode;
+    private Integer enrollmentId;
+    private Integer courseId;
     private String courseName;
-
-    private String result;          // PASSED / FAILED
-    private String certificateCode; // null nếu FAILED
-    private LocalDateTime issuedAt;
+    private Integer studentId;
+    private String studentUsername;
+    private LocalDate issuedDate;
+    private CertificateStatus status;
 }

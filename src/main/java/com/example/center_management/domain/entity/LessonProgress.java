@@ -6,30 +6,39 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "lesson_progress")
+@Table(
+        name = "lesson_progress",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"enrollment_id", "lesson_id"})
+)
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LessonProgress {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    // đăng ký khóa học nào
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enrollment_id", nullable = false)
     private Enrollment enrollment;
 
-    // bài học nào
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id", nullable = false)
     private Lesson lesson;
 
-    @Column(nullable = false)
-    private boolean completed;
+    @Column(name = "is_completed")
+    private Boolean completed;
 
+    @Column(name = "completed_at")
     private LocalDateTime completedAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (completed == null) {
+            completed = false;
+        }
+    }
 }

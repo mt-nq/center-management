@@ -10,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.center_management.exception.BadRequestException;
+
 import com.example.center_management.domain.entity.Course;
 import com.example.center_management.domain.entity.Enrollment;
 import com.example.center_management.domain.entity.Student;
@@ -25,6 +27,7 @@ import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.exception.ResourceNotFoundException;
 import com.example.center_management.repository.CourseRepository;
 import com.example.center_management.repository.EnrollmentRepository;
+import com.example.center_management.repository.OrderRepository;
 import com.example.center_management.repository.StudentRepository;
 import com.example.center_management.service.CertificateService;
 import com.example.center_management.service.EnrollmentService;
@@ -40,6 +43,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final CourseRepository courseRepository;
     private final CertificateService certificateService;
 
+    private final OrderRepository orderRepository;
+
     // ================== ENROLL HỌC VIÊN ==================
     @Override
     @Transactional
@@ -53,7 +58,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment enrollment = Enrollment.builder()
                 .student(student)
                 .course(course)
-                .status(EnrollmentStatus.ENROLLED)   
+                .status(EnrollmentStatus.ENROLLED)
                 .enrolledAt(LocalDateTime.now())
                 .build();
 
@@ -63,35 +68,34 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     // ================== LẤY DANH SÁCH ENROLLMENT ==================
     @Override
-@Transactional(readOnly = true)
-public Page<EnrollmentResponse> getAll(int page, int size) {
-    List<EnrollmentResponse> allEnrollments = enrollmentRepository.findAll()
-            .stream()
-            .map(this::toEnrollmentResponse)
-            .toList();
+    @Transactional(readOnly = true)
+    public Page<EnrollmentResponse> getAll(int page, int size) {
+        List<EnrollmentResponse> allEnrollments = enrollmentRepository.findAll()
+                .stream()
+                .map(this::toEnrollmentResponse)
+                .toList();
 
-    int total = allEnrollments.size();
-    int fromIndex = page * size;
+        int total = allEnrollments.size();
+        int fromIndex = page * size;
 
-    if (fromIndex >= total) {
-        // nếu page quá lớn, trả về trang rỗng
+        if (fromIndex >= total) {
+            // nếu page quá lớn, trả về trang rỗng
+            return new PageImpl<>(
+                    List.of(),
+                    PageRequest.of(page, size),
+                    total
+            );
+        }
+
+        int toIndex = Math.min(fromIndex + size, total);
+        List<EnrollmentResponse> pageContent = allEnrollments.subList(fromIndex, toIndex);
+
         return new PageImpl<>(
-                List.of(),
+                pageContent,
                 PageRequest.of(page, size),
                 total
         );
     }
-
-    int toIndex = Math.min(fromIndex + size, total);
-    List<EnrollmentResponse> pageContent = allEnrollments.subList(fromIndex, toIndex);
-
-    return new PageImpl<>(
-            pageContent,
-            PageRequest.of(page, size),
-            total
-    );
-}
-
 
     @Override
     @Transactional(readOnly = true)
@@ -105,18 +109,31 @@ public Page<EnrollmentResponse> getAll(int page, int size) {
 
     // ================== CẬP NHẬT KẾT QUẢ CHỨNG CHỈ ==================
     /**
-     * Thiết kế mới:
-     * - Không còn result / certificateCode / certificateIssuedAt trong Enrollment.
-     * - Chứng chỉ được tách sang bảng Certificate.
-     * - Ở đây ta chỉ chuyển request (passed = true/false) thành PASS/FAIL
-     *   rồi gọi sang CertificateService.issueCertificate(...)
+     * Thiết kế mới: - Không còn result / certificateCode / certificateIssuedAt
+     * trong Enrollment. - Chứng chỉ được tách sang bảng Certificate. - Ở đây ta
+     * chỉ chuyển request (passed = true/false) thành PASS/FAIL rồi gọi sang
+     * CertificateService.issueCertificate(...)
      */
     @Override
     @Transactional
     public CertificateResponse updateResult(Long enrollmentId, EnrollmentResultUpdateRequest request) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+
+        // 🔥 Chỉ cho chấm nếu đã COMPLETED
+        if (enrollment.getStatus() != EnrollmentStatus.COMPLETED) {
+            throw new BadRequestException("Enrollment is not completed yet");
+        }
+
         boolean passed = Boolean.TRUE.equals(request.getPassed());
         CertificateResult result = passed ? CertificateResult.PASS : CertificateResult.FAIL;
-        // Logic kiểm tra COMPLETED và tạo certificate nằm trong CertificateServiceImpl
+
+        // 🔥 Cập nhật result trong Enrollment ("Dat"/"Khong dat")
+        enrollment.setResult(passed ? "Dat" : "Khong dat");
+        enrollmentRepository.save(enrollment);
+
+        // 🔥 Cấp chứng chỉ (nếu nghiệp vụ yêu cầu chỉ cấp khi passed)
+        // có thể check: if (passed) mới issueCertificate(...)
         return certificateService.issueCertificate(enrollmentId, result);
     }
 
@@ -163,15 +180,14 @@ public Page<EnrollmentResponse> getAll(int page, int size) {
 
         // Enrollment info
         res.setEnrolledAt(e.getEnrolledAt());
+        res.setStatus(e.getStatus() != null ? e.getStatus().name() : null);
+        res.setResult(e.getResult());  // 🔥 lấy từ Enrollment
 
         // Thông tin chứng chỉ (nếu đã có Certificate)
         Certificate cert = e.getCertificate();
         if (cert != null) {
-            // Giả sử EnrollmentResponse có field result (String) & certificateNo
-            res.setResult(cert.getResult() != null ? cert.getResult().name() : null);
             res.setCertificateNo(cert.getCertificateNo());
         } else {
-            res.setResult(null);
             res.setCertificateNo(null);
         }
 
@@ -204,9 +220,16 @@ public Page<EnrollmentResponse> getAll(int page, int size) {
         if (completed) {
             enrollment.setStatus(EnrollmentStatus.COMPLETED);
             enrollment.setCompletedAt(LocalDateTime.now());
+
+            // nếu chưa có result thì vẫn để "Dang hoc" cho tới khi admin chấm
+            if (enrollment.getResult() == null) {
+                enrollment.setResult("Dang hoc");
+            }
         } else {
             enrollment.setStatus(EnrollmentStatus.NOT_COMPLETED);
             enrollment.setCompletedAt(null);
+            // có thể reset result, tuỳ nghiệp vụ: null hoặc "Khong hoan thanh"
         }
     }
+
 }

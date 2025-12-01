@@ -1,45 +1,52 @@
 package com.example.center_management.domain.entity;
 
-import java.time.LocalDateTime;
-
-import com.example.center_management.domain.enums.EnrollmentStatus;
-
+import com.example.center_management.domain.enums.ResultStatus;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "enrollments")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Enrollment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    // Mỗi enrollment gắn với 1 học viên
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    // student_id
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
-    private Student student;
+    private User student;
 
-    // Mỗi enrollment gắn với 1 khóa học
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @Column(name = "enrolled_at", nullable = false)
-    private LocalDateTime enrolledAt;
+    // order_id unique, có thể null nếu admin tạo tay
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", unique = true)
+    private Order order;
+
+    @Column(name = "register_date")
+    private LocalDate registerDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private EnrollmentStatus status; // ENROLLED / COMPLETED / NOT_COMPLETED
+    @Column(name = "result", length = 20)
+    private ResultStatus result;
 
-    @Column(name = "completed_at")
-    private LocalDateTime completedAt;
-
-    @OneToOne(mappedBy = "enrollment", fetch = FetchType.LAZY)
-    private Certificate certificate;
+    @PrePersist
+    public void prePersist() {
+        if (registerDate == null) {
+            registerDate = LocalDate.now();
+        }
+        if (result == null) {
+            result = ResultStatus.DANG_HOC;
+        }
+    }
 }

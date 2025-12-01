@@ -13,4 +13,6 @@ public class EnrollmentCreateRequest {
 
     @NotNull
     private Long courseId;
+
+    private Long orderId;
 }

@@ -1,24 +1,16 @@
+// EnrollmentResponse.java
 package com.example.center_management.dto.response;
 
-import java.time.LocalDateTime;
+import com.example.center_management.domain.enums.ResultStatus;
+import lombok.Builder;
+import lombok.Data;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
+@Data
+@Builder
 public class EnrollmentResponse {
 
-    private Long id;
-    private Long studentId;
-    private String studentCode;
-    private String studentName;
-
-    private Long courseId;
-    private String courseCode;
-    private String courseTitle;
-
-    private LocalDateTime enrolledAt;
-    private String result;
-    private String certificateNo;
+    private Integer id;
+    private Integer courseId;
+    private String courseName;
+    private ResultStatus result;
 }

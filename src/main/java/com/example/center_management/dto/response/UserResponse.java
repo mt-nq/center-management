@@ -12,6 +12,7 @@ public class UserResponse {
     private Long id;
     private String username;
     private String fullName;
-    private Boolean isActive;
-    private String createdAt;   // để map sang String cho đẹp (ISO)
+    private String role;
+    private String status;
+    private String createdAt;
 }

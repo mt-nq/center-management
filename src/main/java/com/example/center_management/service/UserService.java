@@ -1,13 +1,9 @@
 package com.example.center_management.service;
 
-import com.example.center_management.dto.request.UserCreateRequest;
-import com.example.center_management.dto.response.UserResponse;
-
-import java.util.List;
+import com.example.center_management.dto.auth.UserSimpleResponse;
 
 public interface UserService {
 
-    UserResponse create(UserCreateRequest request);
-
-    List<UserResponse> getAll();
+    // Lấy thông tin user hiện tại (dành cho /api/users/me)
+    UserSimpleResponse getCurrentUser();
 }
