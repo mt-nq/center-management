@@ -3,6 +3,8 @@ package com.example.center_management.service.impl;
 import com.example.center_management.domain.entity.Course;
 import com.example.center_management.domain.entity.Order;
 import com.example.center_management.domain.entity.Student;
+import com.example.center_management.domain.enums.ApprovalStatus;
+import com.example.center_management.domain.enums.PaymentStatus;
 import com.example.center_management.dto.request.EnrollmentCreateRequest;
 import com.example.center_management.dto.request.OrderCreateRequest;
 import com.example.center_management.dto.response.OrderResponse;
@@ -44,7 +46,8 @@ public class OrderServiceImpl implements OrderService {
                 .course(course)
                 .amount(request.getAmount())
                 .paymentMethod(request.getPaymentMethod())
-                .approvalStatus("PENDING")
+                .paymentStatus(PaymentStatus.PAID)          // đã thanh toán xong mới tạo order
+                .approvalStatus(ApprovalStatus.PENDING)    // chờ admin duyệt
                 .build();
 
         order = orderRepository.save(order);
@@ -55,7 +58,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> getPendingOrders() {
-        return orderRepository.findByApprovalStatus("PENDING")
+        // Repository nên có method: List<Order> findByApprovalStatus(ApprovalStatus status);
+        return orderRepository.findByApprovalStatus(ApprovalStatus.PENDING)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -68,10 +72,12 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-        if ("APPROVED".equalsIgnoreCase(order.getApprovalStatus())) {
+        ApprovalStatus currentStatus = order.getApprovalStatus();
+
+        if (currentStatus == ApprovalStatus.APPROVED) {
             throw new BadRequestException("Order already approved");
         }
-        if ("REJECTED".equalsIgnoreCase(order.getApprovalStatus())) {
+        if (currentStatus == ApprovalStatus.REJECTED) {
             throw new BadRequestException("Order already rejected");
         }
 
@@ -81,7 +87,7 @@ public class OrderServiceImpl implements OrderService {
         enrollReq.setCourseId(order.getCourse().getId());
         enrollmentService.enroll(enrollReq);
 
-        order.setApprovalStatus("APPROVED");
+        order.setApprovalStatus(ApprovalStatus.APPROVED);
         order.setApprovedAt(LocalDateTime.now());
 
         order = orderRepository.save(order);
@@ -95,14 +101,16 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-        if ("APPROVED".equalsIgnoreCase(order.getApprovalStatus())) {
+        ApprovalStatus currentStatus = order.getApprovalStatus();
+
+        if (currentStatus == ApprovalStatus.APPROVED) {
             throw new BadRequestException("Order already approved");
         }
-        if ("REJECTED".equalsIgnoreCase(order.getApprovalStatus())) {
+        if (currentStatus == ApprovalStatus.REJECTED) {
             throw new BadRequestException("Order already rejected");
         }
 
-        order.setApprovalStatus("REJECTED");
+        order.setApprovalStatus(ApprovalStatus.REJECTED);
         order.setRejectedAt(LocalDateTime.now());
 
         order = orderRepository.save(order);
@@ -119,7 +127,8 @@ public class OrderServiceImpl implements OrderService {
                 .courseTitle(o.getCourse().getTitle())
                 .amount(o.getAmount())
                 .paymentMethod(o.getPaymentMethod())
-                .approvalStatus(o.getApprovalStatus())
+                // nếu OrderResponse.approvalStatus là String thì dùng .name()
+                .approvalStatus(o.getApprovalStatus() != null ? o.getApprovalStatus().name() : null)
                 .createdAt(o.getCreatedAt())
                 .approvedAt(o.getApprovedAt())
                 .rejectedAt(o.getRejectedAt())

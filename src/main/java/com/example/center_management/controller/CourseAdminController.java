@@ -33,4 +33,9 @@ public class CourseAdminController {
                                       @Valid @RequestBody ChapterCreateRequest request) {
         return courseService.addChapter(courseId, request);
     }
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+    courseService.delete(id); // soft delete: set INACTIVE
+}
+
 }

@@ -1,6 +1,7 @@
 package com.example.center_management.service.impl;
 
 import com.example.center_management.domain.entity.User;
+import com.example.center_management.domain.enums.Role;
 import com.example.center_management.dto.auth.AdminCreateRequest;
 import com.example.center_management.dto.auth.AuthLoginRequest;
 import com.example.center_management.dto.auth.StudentRegisterRequest;
@@ -9,6 +10,7 @@ import com.example.center_management.exception.BadRequestException;
 import com.example.center_management.repository.UserRepository;
 import com.example.center_management.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // ============ /auth/register – Học viên đăng ký ============
     @Override
@@ -26,11 +29,10 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Username already exists");
         }
 
-        // StudentRegisterRequest: username, password, email, phone
-        // User entity hiện TINH GIẢN: chỉ dùng username + password + isActive
         User user = User.builder()
                 .username(request.getUsername())
-                .password(request.getPassword())   // demo: chưa mã hoá
+                .password(passwordEncoder.encode(request.getPassword())) // mã hoá
+                .role(Role.STUDENT)
                 .isActive(true)
                 .build();
 
@@ -45,7 +47,14 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new BadRequestException("Invalid username or password"));
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        // DEBUG xem cho chắc
+        boolean match = passwordEncoder.matches(request.getPassword(), user.getPassword());
+        System.out.println(">>> LOGIN DEBUG username=" + request.getUsername()
+                + " raw=" + request.getPassword()
+                + " hash=" + user.getPassword()
+                + " match=" + match);
+
+        if (!match) {
             throw new BadRequestException("Invalid username or password");
         }
 
@@ -60,19 +69,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public UserSimpleResponse createAdmin(AdminCreateRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new BadRequestException("Username already exists");
-        }
-
-        // Admin cũng tạm thời giống student: username + password + isActive
-        User user = User.builder()
-                .username(request.getUsername())
-                .password(request.getPassword())   // demo: chưa mã hoá
-                .isActive(true)
-                .build();
-
-        user = userRepository.save(user);
-        return toSimpleResponse(user);
+        // Admin cố định, không cho tạo qua API nữa
+        throw new BadRequestException("Admin account is fixed and cannot be created via API");
     }
 
     // ============ Helper ============

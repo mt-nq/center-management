@@ -1,5 +1,6 @@
 package com.example.center_management.service.impl;
 
+import com.example.center_management.domain.enums.Role;
 import com.example.center_management.domain.entity.User;
 import com.example.center_management.dto.request.UserCreateRequest;
 import com.example.center_management.dto.response.UserResponse;

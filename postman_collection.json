@@ -1,63 +1,430 @@
 {
   "info": {
-    "name": "Center Management API",
-    "_postman_id": "b24dccc279-center-management",
-    "description": "Collection for Center Management (students/courses/enrollments).",
+    "name": "Center Management API (Full)",
+    "_postman_id": "center-management-full-collection",
+    "description": "Full API collection for center-management backend project.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     { "key": "base_url", "value": "http://localhost:8082" },
-    { "key": "auth.username", "value": "admin" },
-    { "key": "auth.password", "value": "admin" }
+    { "key": "token", "value": "" }
   ],
   "item": [
     {
-      "name": "Create Student",
-      "request": {
-        "auth": { "type": "basic", "basic": [ { "key": "username", "value": "{{auth.username}}" }, { "key": "password", "value": "{{auth.password}}" } ] },
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"dob\": \"2000-01-01\",\n  \"hometown\": \"Hanoi\",\n  \"province\": \"HN\"\n}"
+      "name": "AUTH",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
         },
-        "url": { "raw": "{{base_url}}/api/students", "host": ["{{base_url}}"], "path": ["api","students"] }
-      }
-    },
-    {
-      "name": "Create Course",
-      "request": {
-        "auth": { "type": "basic", "basic": [ { "key": "username", "value": "{{auth.username}}" }, { "key": "password", "value": "{{auth.password}}" } ] },
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Java 101\",\n  \"startDate\": \"2025-12-01\",\n  \"endDate\": \"2025-12-31\",\n  \"content\": \"Course content here\"\n}"
+        {
+          "name": "Register (Student)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student1\",\n  \"email\": \"student@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/register"
+          }
         },
-        "url": { "raw": "{{base_url}}/api/courses", "host": ["{{base_url}}"], "path": ["api","courses"] }
-      }
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/refresh-token"
+          }
+        }
+      ]
     },
+
     {
-      "name": "Create Enrollment",
-      "request": {
-        "auth": { "type": "basic", "basic": [ { "key": "username", "value": "{{auth.username}}" }, { "key": "password", "value": "{{auth.password}}" } ] },
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"studentId\": 1,\n  \"courseId\": 1\n}"
+      "name": "ME",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/me/profile"
+          }
         },
-        "url": { "raw": "{{base_url}}/api/enrollments", "host": ["{{base_url}}"], "path": ["api","enrollments"] }
-      }
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"New Name\",\n  \"phone\": \"0123456789\"\n}"
+            },
+            "url": "{{base_url}}/api/me/profile"
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"123456\",\n  \"newPassword\": \"654321\"\n}"
+            },
+            "url": "{{base_url}}/api/me/change-password"
+          }
+        }
+      ]
     },
+
     {
-      "name": "List Enrollments",
-      "request": {
-        "auth": { "type": "basic", "basic": [ { "key": "username", "value": "{{auth.username}}" }, { "key": "password", "value": "{{auth.password}}" } ] },
-        "method": "GET",
-        "header": [],
-        "url": { "raw": "{{base_url}}/api/enrollments", "host": ["{{base_url}}"], "path": ["api","enrollments"] }
-      }
+      "name": "ADMIN - USERS",
+      "item": [
+        {
+          "name": "Create Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin2\",\n  \"password\": \"admin123\"\n}" },
+            "url": "{{base_url}}/api/admin/users/create-admin"
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/admin/users"
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/admin/users/1"
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated\",\n  \"email\": \"new@example.com\"\n}"
+            },
+            "url": "{{base_url}}/api/admin/users/1"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/admin/users/1"
+          }
+        },
+        {
+          "name": "Toggle Active/Inactive",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/admin/users/1/toggle-status"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "STUDENTS",
+      "item": [
+        {
+          "name": "Create Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": "{{base_url}}/api/students"
+          }
+        },
+        {
+          "name": "Get All Students",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/students"
+          }
+        },
+        {
+          "name": "Get Student By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/students/1"
+          }
+        },
+        {
+          "name": "Update Student",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"New Student Name\"\n}" },
+            "url": "{{base_url}}/api/students/1"
+          }
+        },
+        {
+          "name": "Delete Student",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/students/1"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "COURSES",
+      "item": [
+        {
+          "name": "Get All Courses",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/courses"
+          }
+        },
+        {
+          "name": "Get Course By ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/courses/1"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ADMIN - COURSES",
+      "item": [
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Java Course\",\n  \"description\": \"Backend Java\",\n  \"startDate\": \"2025-01-01\",\n  \"endDate\": \"2025-03-01\"\n}"
+            },
+            "url": "{{base_url}}/api/admin/courses"
+          }
+        },
+        {
+          "name": "Update Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Course\"\n}"
+            },
+            "url": "{{base_url}}/api/admin/courses/1"
+          }
+        },
+        {
+          "name": "Delete Course",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/admin/courses/1"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ENROLLMENT",
+      "item": [
+        {
+          "name": "Enroll Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": 1\n}"
+            },
+            "url": "{{base_url}}/api/enrollments"
+          }
+        },
+        {
+          "name": "My Enrollments",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/enrollments/my-enrollments"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ORDERS",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enrollmentId\": 1\n}"
+            },
+            "url": "{{base_url}}/api/orders"
+          }
+        },
+        {
+          "name": "My Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/orders/my-orders"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ADMIN - ORDERS",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/admin/orders"
+          }
+        },
+        {
+          "name": "Mark Order Paid",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/admin/orders/1/mark-paid"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "PROGRESS",
+      "item": [
+        {
+          "name": "My Course Progress",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/progress/my-progress/1"
+          }
+        },
+        {
+          "name": "Complete Lesson",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/progress/lessons/1/complete"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "CERTIFICATES",
+      "item": [
+        {
+          "name": "My Certificates",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/certificates/my-certificates"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ADMIN - CERTIFICATES",
+      "item": [
+        {
+          "name": "Create Certificate",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": 1,\n  \"courseId\": 1,\n  \"result\": \"PASS\"\n}"
+            },
+            "url": "{{base_url}}/api/admin/certificates"
+          }
+        },
+        {
+          "name": "Revoke Certificate",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/admin/certificates/1/revoke"
+          }
+        }
+      ]
     }
   ]
 }

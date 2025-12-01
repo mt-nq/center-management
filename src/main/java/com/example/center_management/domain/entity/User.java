@@ -1,5 +1,6 @@
 package com.example.center_management.domain.entity;
 
+import com.example.center_management.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,9 +25,17 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "email", unique = true, length = 150)
+    private String email;
+
     @Column(name = "full_name", length = 100)
     private String fullName;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role;
+
+    @Builder.Default
     @Column(name = "is_active")
     private Boolean isActive = true;
 
@@ -36,5 +45,11 @@ public class User {
     @PrePersist
     void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (this.role == null) {
+            this.role = Role.STUDENT; // default cho user mới
+        }
+        if (this.isActive == null) {
+            this.isActive = true;
+        }
     }
 }

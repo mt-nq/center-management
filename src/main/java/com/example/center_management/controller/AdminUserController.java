@@ -19,14 +19,6 @@ public class AdminUserController {
 
     private final AuthService authService;
     private final UserService userService;
-
-    // POST /admin/users/create-admin – Tạo Admin mới (201)
-    @PostMapping("/create-admin")
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserSimpleResponse createAdmin(@Valid @RequestBody AdminCreateRequest request) {
-        return authService.createAdmin(request);
-    }
-
     // GET /admin/users – Lấy danh sách tất cả user (200)
     @GetMapping
     public List<UserResponse> getAll() {

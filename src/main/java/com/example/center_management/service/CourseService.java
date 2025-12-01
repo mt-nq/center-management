@@ -38,4 +38,5 @@ public interface CourseService {
      * Thêm bài học mới vào chương.
      */
     LessonResponse addLesson(Long chapterId, LessonCreateRequest request);
+    
 }
