@@ -3,8 +3,13 @@ package com.example.center_management.domain.entity;
 import com.example.center_management.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -13,43 +18,87 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    // username đăng nhập
+    @Column(nullable = false, unique = true)
     private String username;
 
+    // password đã mã hoá (BCrypt)
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "email", unique = true, length = 150)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "full_name", length = 100)
+    @Column(name = "full_name")
     private String fullName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private Role role;
 
-    @Builder.Default
-    @Column(name = "is_active")
-    private Boolean isActive = true;
+    // ====== CÁC FIELD CŨ ĐANG ĐƯỢC DÙNG TRONG SERVICE ======
 
-    @Column(name = "created_at", updatable = false)
+    // trạng thái hoạt động (để filter ACTIVE/INACTIVE)
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    // thời gian tạo user (dùng trong sort, filter)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    // nếu muốn có luôn updated_at thì để thêm, không bắt buộc
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @PrePersist
-    void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        if (this.role == null) {
-            this.role = Role.STUDENT; // default cho user mới
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
         }
-        if (this.isActive == null) {
-            this.isActive = true;
+        if (isActive == null) {
+            isActive = true;
         }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    // ================= UserDetails implementation =================
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // ROLE_ADMIN / ROLE_STUDENT tuỳ enum Role
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    // getPassword() & getUsername() đã có nhờ Lombok @Getter
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        // nếu muốn dùng isActive để disable account:
+        return Boolean.TRUE.equals(isActive);
     }
 }

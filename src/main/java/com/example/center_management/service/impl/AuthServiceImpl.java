@@ -2,17 +2,19 @@ package com.example.center_management.service.impl;
 
 import com.example.center_management.domain.entity.User;
 import com.example.center_management.domain.enums.Role;
-import com.example.center_management.dto.auth.AdminCreateRequest;
 import com.example.center_management.dto.auth.AuthLoginRequest;
 import com.example.center_management.dto.auth.StudentRegisterRequest;
+import com.example.center_management.dto.response.AuthResponse;
 import com.example.center_management.dto.response.UserSimpleResponse;
-import com.example.center_management.exception.BadRequestException;
 import com.example.center_management.repository.UserRepository;
 import com.example.center_management.service.AuthService;
+import com.example.center_management.service.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,64 +22,66 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
-    // ============ /auth/register – Học viên đăng ký ============
     @Override
-    @Transactional
-    public UserSimpleResponse registerStudent(StudentRegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new BadRequestException("Username already exists");
-        }
-
+    public AuthResponse registerStudent(StudentRegisterRequest request) {
+        // Tạo user mới với role STUDENT
         User user = User.builder()
                 .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword())) // mã hoá
+                .email(request.getEmail())
+                // nếu entity User có fullName thì dùng, không thì bỏ dòng này
+                .fullName(request.getFullName())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.STUDENT)
-                .isActive(true)
                 .build();
 
-        user = userRepository.save(user);
-        return toSimpleResponse(user);
+        userRepository.save(user);
+
+        // Dùng username để gen token
+        String token = jwtService.generateToken(user.getUsername());
+
+        UserSimpleResponse userResponse = toUserSimpleResponse(user);
+
+        return AuthResponse.builder()
+                .token(token)
+                .user(userResponse)
+                .build();
     }
 
-    // ============ /auth/login ============
     @Override
-    @Transactional(readOnly = true)
-    public UserSimpleResponse login(AuthLoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new BadRequestException("Invalid username or password"));
+    public AuthResponse login(AuthLoginRequest request) {
+        // Xác thực username/password
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword()
+                )
+        );
 
-        // DEBUG xem cho chắc
-        boolean match = passwordEncoder.matches(request.getPassword(), user.getPassword());
-        System.out.println(">>> LOGIN DEBUG username=" + request.getUsername()
-                + " raw=" + request.getPassword()
-                + " hash=" + user.getPassword()
-                + " match=" + match);
+        User user = (User) authentication.getPrincipal();
 
-        if (!match) {
-            throw new BadRequestException("Invalid username or password");
-        }
+        // Dùng username để gen token
+        String token = jwtService.generateToken(user.getUsername());
 
-        if (Boolean.FALSE.equals(user.getIsActive())) {
-            throw new BadRequestException("User is inactive");
-        }
+        UserSimpleResponse userResponse = toUserSimpleResponse(user);
 
-        return toSimpleResponse(user);
+        return AuthResponse.builder()
+                .token(token)
+                .user(userResponse)
+                .build();
     }
 
-    // ============ /admin/users/create-admin ============
-    @Override
-    @Transactional
-    public UserSimpleResponse createAdmin(AdminCreateRequest request) {
-        // Admin cố định, không cho tạo qua API nữa
-        throw new BadRequestException("Admin account is fixed and cannot be created via API");
-    }
-
-    // ============ Helper ============
-    private UserSimpleResponse toSimpleResponse(User user) {
+    // ==== MAP ENTITY -> DTO ĐƠN GIẢN CHO FE =====
+    private UserSimpleResponse toUserSimpleResponse(User user) {
+        // Điều chỉnh các field cho đúng với UserSimpleResponse của bạn
         return UserSimpleResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                // Nếu UserSimpleResponse không có role thì xoá dòng dưới
+                .role(user.getRole().name())
+                // ĐÃ BỎ .email() vì DTO của bạn không có field này
                 .build();
     }
 }

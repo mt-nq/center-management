@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.center_management.dto.auth.AuthLoginRequest;
 import com.example.center_management.dto.auth.StudentRegisterRequest;
-import com.example.center_management.dto.response.UserSimpleResponse;
+import com.example.center_management.dto.response.AuthResponse;
 import com.example.center_management.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -22,16 +22,16 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // POST /auth/register – Đăng ký Học viên (Public, 201)
+    // POST /api/auth/register – Đăng ký Học viên (Public, 201)
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserSimpleResponse register(@Valid @RequestBody StudentRegisterRequest request) {
+    public AuthResponse register(@Valid @RequestBody StudentRegisterRequest request) {
         return authService.registerStudent(request);
     }
 
-    // POST /auth/login – Đăng nhập (Public, 200)
+    // POST /api/auth/login – Đăng nhập (Public, 200)
     @PostMapping("/login")
-    public UserSimpleResponse login(@Valid @RequestBody AuthLoginRequest request) {
+    public AuthResponse login(@Valid @RequestBody AuthLoginRequest request) {
         return authService.login(request);
     }
 }
