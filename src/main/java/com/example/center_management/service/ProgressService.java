@@ -2,6 +2,9 @@ package com.example.center_management.service;
 
 import com.example.center_management.dto.response.EnrollmentProgressResponse;
 import com.example.center_management.dto.response.LessonProgressResponse;
+import com.example.center_management.dto.request.LessonCompleteRequest;
+
+import java.util.List;
 
 public interface ProgressService {
 
@@ -10,4 +13,6 @@ public interface ProgressService {
     EnrollmentProgressResponse getProgress(Long enrollmentId);
 
     EnrollmentProgressResponse getProgressForAdmin(Long enrollmentId);
+
+    List<EnrollmentProgressResponse> getEnrollmentsWithFullProgress();
 }

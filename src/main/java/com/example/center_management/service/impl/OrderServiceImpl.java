@@ -127,7 +127,7 @@ public class OrderServiceImpl implements OrderService {
                 .courseTitle(o.getCourse().getTitle())
                 .amount(o.getAmount())
                 .paymentMethod(o.getPaymentMethod())
-                // nếu OrderResponse.approvalStatus là String thì dùng .name()
+                .paymentStatus(o.getPaymentStatus())
                 .approvalStatus(o.getApprovalStatus() != null ? o.getApprovalStatus().name() : null)
                 .createdAt(o.getCreatedAt())
                 .approvedAt(o.getApprovedAt())

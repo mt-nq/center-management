@@ -65,7 +65,10 @@ public class User implements UserDetails {
             isActive = true;
         }
     }
-
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

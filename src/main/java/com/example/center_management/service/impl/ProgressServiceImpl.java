@@ -15,7 +15,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.time.LocalDateTime;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -103,5 +108,18 @@ public class ProgressServiceImpl implements ProgressService {
                 .completedVideoLessons(completedVideos)
                 .progressPercent(percent)
                 .build();
-    }
+        }
+        @Override
+        @Transactional(readOnly = true)
+        public List<EnrollmentProgressResponse> getEnrollmentsWithFullProgress() {
+        return enrollmentRepository.findAll()
+                .stream()
+                .map(enrollment -> buildProgressResponse(enrollment.getId())) // ✅ truyền Long
+                .filter(resp -> {
+                        Double p = resp.getProgressPercent();
+                        return p != null && p >= 99.99; // coi ~100% là đủ điều kiện
+                })
+                .collect(Collectors.toList());
+}
+
 }

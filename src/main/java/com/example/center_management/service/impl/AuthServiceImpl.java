@@ -15,6 +15,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.center_management.service.StudentService;
+
 
 @Service
 @RequiredArgsConstructor
@@ -24,14 +26,15 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final StudentService studentService;
+
 
     @Override
     public AuthResponse registerStudent(StudentRegisterRequest request) {
-        // Tạo user mới với role STUDENT
+        // 1. Tạo user mới với role STUDENT
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                // nếu entity User có fullName thì dùng, không thì bỏ dòng này
                 .fullName(request.getFullName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.STUDENT)
@@ -39,7 +42,11 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        // Dùng username để gen token
+        // 2. Tự động tạo Student gắn với User này
+        studentService.createForUser(user, request);
+
+
+        // 3. Gen token cho user
         String token = jwtService.generateToken(user.getUsername());
 
         UserSimpleResponse userResponse = toUserSimpleResponse(user);
@@ -49,6 +56,8 @@ public class AuthServiceImpl implements AuthService {
                 .user(userResponse)
                 .build();
     }
+
+
 
     @Override
     public AuthResponse login(AuthLoginRequest request) {
@@ -84,4 +93,5 @@ public class AuthServiceImpl implements AuthService {
                 // ĐÃ BỎ .email() vì DTO của bạn không có field này
                 .build();
     }
+    
 }

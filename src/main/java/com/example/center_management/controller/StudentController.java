@@ -1,20 +1,9 @@
 package com.example.center_management.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 
-import com.example.center_management.dto.request.StudentCreateRequest;
 import com.example.center_management.dto.request.StudentUpdateRequest;
 import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.service.StudentService;
@@ -23,22 +12,19 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/students")
+@RequestMapping("/api/admin/students")
 @RequiredArgsConstructor
 public class StudentController {
 
     private final StudentService studentService;
 
-    @PostMapping
-    public StudentResponse create(@Valid @RequestBody StudentCreateRequest request) {
-        return studentService.create(request);
-    }
-
+    // Admin xem chi tiết 1 student
     @GetMapping("/{id}")
     public StudentResponse getById(@PathVariable Long id) {
         return studentService.getById(id);
     }
 
+    // Admin xem danh sách student (phân trang)
     @GetMapping
     public Page<StudentResponse> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -47,14 +33,9 @@ public class StudentController {
         return studentService.getAll(page, size);
     }
 
-    @PutMapping("/{id}")
-    public StudentResponse update(
-            @PathVariable Long id,
-            @Valid @RequestBody StudentUpdateRequest request
-    ) {
-        return studentService.update(id, request);
-    }
+    // ❌ Không còn PUT ở đây – Admin không được update profile
 
+    // Admin xoá (soft delete) student
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         studentService.delete(id);

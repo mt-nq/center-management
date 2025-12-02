@@ -12,12 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 
 import com.example.center_management.domain.entity.Student;
-import com.example.center_management.dto.request.StudentCreateRequest;
+import com.example.center_management.dto.auth.StudentRegisterRequest;
 import com.example.center_management.dto.request.StudentUpdateRequest;
 import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.exception.ResourceNotFoundException;
 import com.example.center_management.repository.StudentRepository;
 import com.example.center_management.service.StudentService;
+import com.example.center_management.domain.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,15 +31,17 @@ public class StudentServiceImpl implements StudentService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    // ================== AUTO TẠO STUDENT KHI ĐĂNG KÝ USER ==================
     @Override
     @Transactional
-    public StudentResponse create(StudentCreateRequest request) {
+    public StudentResponse createForUser(User user, StudentRegisterRequest request) {
         Student student = Student.builder()
-                .fullName(request.getFullName())
-                .dob(request.getDob())
+                .fullName(request.getFullName() != null ? request.getFullName() : user.getFullName())
+                .dob(request.getDob())               // 🚀 KHÔNG CÒN null CỨNG
                 .hometown(request.getHometown())
                 .province(request.getProvince())
                 .status("ACTIVE")
+                .user(user)
                 .build();
 
         student.setCode(generateStudentCode());
@@ -47,6 +50,7 @@ public class StudentServiceImpl implements StudentService {
         return toStudentResponse(saved);
     }
 
+    // ================== CÁC HÀM KHÁC ==================
     @Override
     @Transactional(readOnly = true)
     public StudentResponse getById(Long id) {

@@ -7,6 +7,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.example.center_management.domain.enums.PaymentStatus;
+
 @Getter
 @Setter
 @Builder
@@ -22,8 +24,8 @@ public class OrderResponse {
 
     private BigDecimal amount;
     private String paymentMethod;
-
-    private String approvalStatus;   // PENDING / APPROVED / REJECTED
+    private PaymentStatus paymentStatus;
+    private String approvalStatus;
     private LocalDateTime createdAt;
     private LocalDateTime approvedAt;
     private LocalDateTime rejectedAt;

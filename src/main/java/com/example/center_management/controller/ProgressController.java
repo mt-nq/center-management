@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -34,5 +36,9 @@ public class ProgressController {
     @GetMapping("/admin/enrollments/{enrollmentId}/progress")
     public EnrollmentProgressResponse getProgressForAdmin(@PathVariable Long enrollmentId) {
         return progressService.getProgressForAdmin(enrollmentId);
+    }
+    @GetMapping("/admin/enrollments/ready-for-certificate")
+    public List<EnrollmentProgressResponse> getEnrollmentsReadyForCertificate() {
+        return progressService.getEnrollmentsWithFullProgress();
     }
 }
