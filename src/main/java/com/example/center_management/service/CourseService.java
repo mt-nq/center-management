@@ -17,5 +17,5 @@ public interface CourseService {
 
     void delete(Long id);
 
-    Page<CourseResponse> getAll(int page, int size);
+    Page<CourseResponse> getAll(int page, int size, String search, String status);
 }

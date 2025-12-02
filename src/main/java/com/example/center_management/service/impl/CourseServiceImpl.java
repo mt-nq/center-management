@@ -1,24 +1,21 @@
 package com.example.center_management.service.impl;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.center_management.domain.entity.Course;
-import com.example.center_management.domain.entity.Student;
 import com.example.center_management.dto.request.CourseCreateRequest;
 import com.example.center_management.dto.request.CourseUpdateRequest;
 import com.example.center_management.dto.response.CourseResponse;
-import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.exception.BadRequestException;
 import com.example.center_management.exception.ResourceNotFoundException;
 import com.example.center_management.repository.CourseRepository;
-import com.example.center_management.repository.StudentRepository;
 import com.example.center_management.service.CourseService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,8 +25,6 @@ import lombok.RequiredArgsConstructor;
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
-    
-    private final StudentRepository studentRepository;
 
     @Override
     @Transactional
@@ -58,38 +53,6 @@ public class CourseServiceImpl implements CourseService {
         return toResponse(course);
     }
 
-@Override
-    @Transactional(readOnly = true)
-    public Page<CourseResponse> getAll(int page, int size) {
-
-        List<CourseResponse> allActiveCourses = courseRepository.findAll()
-                .stream()
-                .filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus()))
-                .map(this::toResponse)
-                .toList();
-
-        int total = allActiveCourses.size();
-        int fromIndex = page * size;
-
-        if (fromIndex >= total) {
-            return new PageImpl<>(
-                    List.of(),
-                    PageRequest.of(page, size),
-                    total
-            );
-        }
-
-        int toIndex = Math.min(fromIndex + size, total);
-        List<CourseResponse> pageContent = allActiveCourses.subList(fromIndex, toIndex);
-
-        return new PageImpl<>(
-                pageContent,
-                PageRequest.of(page, size),
-                total
-        );
-    }
-
-
     @Override
     @Transactional
     public CourseResponse update(Long id, CourseUpdateRequest request) {
@@ -106,21 +69,43 @@ public class CourseServiceImpl implements CourseService {
         return toResponse(course);
     }
 
-  @Override
+    @Override
     @Transactional
     public void delete(Long id) {
-        // ❗ Soft delete: không xóa khỏi DB, chỉ INACTIVE
-        Course  course =  courseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(" course not found"));
-
-        // Nếu muốn, có thể check xem đã INACTIVE chưa
-        if ("INACTIVE".equalsIgnoreCase( course.getStatus())) {
-            return; // hoặc throw exception tùy nghiệp vụ
+        if (!courseRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Course not found");
         }
 
-        course.setStatus("INACTIVE");
-        courseRepository.save( course);
+        courseRepository.deleteById(id);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CourseResponse> getAll(int page, int size, String search, String status) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        Page<Course> courses;
+
+        boolean hasSearch = search != null && !search.isEmpty();
+        boolean hasStatus = status != null && !status.isEmpty();
+
+        if (!hasSearch && !hasStatus) {
+            courses = courseRepository.findAll(pageable);
+        } else if (hasSearch && !hasStatus) {
+            courses = courseRepository.findByTitleContainingIgnoreCaseOrCodeContainingIgnoreCaseOrContentContainingIgnoreCase(
+                    search, search, search, pageable
+            );
+        } else if (!hasSearch && hasStatus) {
+            courses = courseRepository.findByStatus(status.toUpperCase(), pageable);
+        } else {
+            courses = courseRepository.findByStatusAndTitleContainingIgnoreCaseOrCodeContainingIgnoreCaseOrContentContainingIgnoreCase(
+                    status.toUpperCase(), search, search, search, pageable
+            );
+        }
+
+        return courses.map(this::toResponseWithDynamicStatus);
+    }
+
     private void validateDates(LocalDate start, LocalDate end) {
         if (end.isBefore(start)) {
             throw new BadRequestException("End date must be after start date");
@@ -143,6 +128,21 @@ public class CourseServiceImpl implements CourseService {
         res.setStatus(c.getStatus());
         res.setCreatedAt(c.getCreatedAt());
         res.setUpdatedAt(c.getUpdatedAt());
+        return res;
+    }
+
+    private CourseResponse toResponseWithDynamicStatus(Course c) {
+        CourseResponse res = toResponse(c);
+        LocalDate today = LocalDate.now();
+
+        if (today.isBefore(c.getStartDate())) {
+            res.setStatus("Sắp diễn ra");
+        } else if (!today.isBefore(c.getStartDate()) && !today.isAfter(c.getEndDate())) {
+            res.setStatus("Đang diễn ra");
+        } else {
+            res.setStatus("Đã kết thúc");
+        }
+
         return res;
     }
 }
