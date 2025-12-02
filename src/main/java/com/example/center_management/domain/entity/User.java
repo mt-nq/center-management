@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import com.example.center_management.domain.enums.Role;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -37,4 +39,9 @@ public class User {
     void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 20)
+    private Role role;
+
 }
