@@ -1,16 +1,18 @@
 package com.example.center_management.dto.response;
 
+import com.example.center_management.domain.enums.ApprovalStatus;
+import com.example.center_management.domain.enums.PaymentStatus;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.example.center_management.domain.enums.PaymentStatus;
-
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class OrderResponse {
 
@@ -22,11 +24,14 @@ public class OrderResponse {
     private Long courseId;
     private String courseTitle;
 
-    private BigDecimal amount;
-    private String paymentMethod;
-    private PaymentStatus paymentStatus;
-    private String approvalStatus;
+    private BigDecimal totalAmount;         // khớp Order.amount
+
+    private PaymentStatus paymentStatus;    // enum
+    private ApprovalStatus approvalStatus;  // enum
+
     private LocalDateTime createdAt;
     private LocalDateTime approvedAt;
     private LocalDateTime rejectedAt;
+
+    private String transferNote;
 }

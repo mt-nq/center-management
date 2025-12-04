@@ -1,38 +1,36 @@
 package com.example.center_management.controller;
 
 import com.example.center_management.dto.request.OrderCreateRequest;
-import com.example.center_management.dto.response.EnrollmentResponse;
 import com.example.center_management.dto.response.OrderResponse;
-import com.example.center_management.service.EnrollmentService;
 import com.example.center_management.service.OrderService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/orders")   // 👈 QUAN TRỌNG: trùng đúng với path bạn đang gọi
 @RequiredArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
-    private final EnrollmentService enrollmentService;
 
-    // ========== POST /orders – Tạo đơn sau khi thanh toán ==========
-    @PostMapping("/orders")
-    @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponse createOrder(@Valid @RequestBody OrderCreateRequest request) {
-        return orderService.createOrder(request);
+    // STUDENT: bấm nút Thanh toán -> tạo order
+    @PostMapping
+    public ResponseEntity<OrderResponse> createOrder(
+            @Valid @RequestBody OrderCreateRequest request
+    ) {
+        OrderResponse response = orderService.createOrder(request);
+        return ResponseEntity.ok(response);
     }
 
-    // ========== GET /enrollments/me – Danh sách khóa học đã kích hoạt ==========
-    // Ở đây mình cho truyền studentId qua query param cho đơn giản (chưa dùng token)
-    @GetMapping("/enrollments/me")
-    public List<EnrollmentResponse> getMyEnrollments(
-            @RequestParam("studentId") Long studentId
+    // STUDENT: xem các đơn của mình
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<List<OrderResponse>> getOrdersByStudent(
+            @PathVariable Long studentId
     ) {
-        return enrollmentService.getByStudent(studentId);
+        return ResponseEntity.ok(orderService.getOrdersByStudent(studentId));
     }
 }

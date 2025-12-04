@@ -1,5 +1,6 @@
 package com.example.center_management.domain.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,6 +44,9 @@ public class Course {
 
     // Nội dung mô tả khoá học
     private String content;
+
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
 
     @Column(length = 20)
     private String status; // ACTIVE / INACTIVE

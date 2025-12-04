@@ -41,13 +41,14 @@ public class OrderServiceImpl implements OrderService {
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
+        // amount: lấy theo giá khóa học (nếu muốn)
         Order order = Order.builder()
                 .student(student)
                 .course(course)
-                .amount(request.getAmount())
-                .paymentMethod(request.getPaymentMethod())
-                .paymentStatus(PaymentStatus.PAID)          // đã thanh toán xong mới tạo order
+                .amount(course.getPrice())                 // 👈 dùng amount trong entity Order
+                .paymentStatus(PaymentStatus.PENDING)      // đang chờ xác nhận thanh toán
                 .approvalStatus(ApprovalStatus.PENDING)    // chờ admin duyệt
+                .createdAt(LocalDateTime.now())
                 .build();
 
         order = orderRepository.save(order);
@@ -58,7 +59,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> getPendingOrders() {
-        // Repository nên có method: List<Order> findByApprovalStatus(ApprovalStatus status);
         return orderRepository.findByApprovalStatus(ApprovalStatus.PENDING)
                 .stream()
                 .map(this::toResponse)
@@ -117,21 +117,45 @@ public class OrderServiceImpl implements OrderService {
         return toResponse(order);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getOrdersByStudent(Long studentId) {
+        return orderRepository.findByStudent_Id(studentId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     // ================== HELPER ==================
-    private OrderResponse toResponse(Order o) {
-        return OrderResponse.builder()
-                .id(o.getId())
-                .studentId(o.getStudent().getId())
-                .studentName(o.getStudent().getFullName())
-                .courseId(o.getCourse().getId())
-                .courseTitle(o.getCourse().getTitle())
-                .amount(o.getAmount())
-                .paymentMethod(o.getPaymentMethod())
-                .paymentStatus(o.getPaymentStatus())
-                .approvalStatus(o.getApprovalStatus() != null ? o.getApprovalStatus().name() : null)
-                .createdAt(o.getCreatedAt())
-                .approvedAt(o.getApprovedAt())
-                .rejectedAt(o.getRejectedAt())
-                .build();
+    private OrderResponse toResponse(Order order) {
+        OrderResponse res = new OrderResponse();
+        res.setId(order.getId());
+
+        if (order.getStudent() != null) {
+            res.setStudentId(order.getStudent().getId());
+            res.setStudentName(order.getStudent().getFullName());
+        }
+
+        if (order.getCourse() != null) {
+            res.setCourseId(order.getCourse().getId());
+            res.setCourseTitle(order.getCourse().getTitle());
+        }
+
+        // 👇 KHỚP VỚI ENTITY Order: dùng amount thay vì totalAmount
+        res.setTotalAmount(order.getAmount());
+
+        res.setPaymentStatus(order.getPaymentStatus());
+        res.setApprovalStatus(order.getApprovalStatus());
+        res.setCreatedAt(order.getCreatedAt());
+        res.setApprovedAt(order.getApprovedAt());
+        res.setRejectedAt(order.getRejectedAt());
+
+        String studentPart = order.getStudent() != null
+                ? order.getStudent().getId().toString()
+                : "UNKNOWN";
+
+        res.setTransferNote("ORDER-" + order.getId() + "-STUDENT-" + studentPart);
+
+        return res;
     }
 }

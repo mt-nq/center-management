@@ -18,4 +18,6 @@ public interface OrderService {
 
     // PUT /admin/orders/{id}/reject
     OrderResponse rejectOrder(Long orderId);
+
+    List<OrderResponse> getOrdersByStudent(Long studentId);
 }

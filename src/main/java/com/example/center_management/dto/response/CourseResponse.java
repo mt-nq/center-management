@@ -1,5 +1,6 @@
 package com.example.center_management.dto.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -17,6 +18,8 @@ public class CourseResponse {
     private LocalDate endDate;
     private String content;
     private String status;
+    private BigDecimal price;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

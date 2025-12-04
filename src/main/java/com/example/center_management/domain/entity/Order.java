@@ -33,9 +33,6 @@ public class Order {
     @Column(precision = 15, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "payment_method", length = 50)
-    private String paymentMethod;
-
     // ====== THÊM MỚI: PAYMENT STATUS ======
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", length = 20, nullable = false)

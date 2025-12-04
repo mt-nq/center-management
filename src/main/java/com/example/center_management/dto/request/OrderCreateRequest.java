@@ -16,10 +16,4 @@ public class OrderCreateRequest {
 
     @NotNull
     private Long courseId;
-
-    @NotNull
-    @Positive
-    private BigDecimal amount;
-
-    private String paymentMethod; // có thể null, không bắt buộc
 }

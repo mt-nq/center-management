@@ -51,6 +51,7 @@ public class CourseServiceImpl implements CourseService {
                 .endDate(request.getEndDate())
                 .content(request.getContent())
                 .status("ACTIVE")
+                .price(request.getPrice())
                 .build();
 
         course.setCode(generateCourseCode());
@@ -208,6 +209,7 @@ public class CourseServiceImpl implements CourseService {
         res.setEndDate(c.getEndDate());
         res.setContent(c.getContent());
         res.setStatus(c.getStatus());
+        res.setPrice(c.getPrice());
         res.setCreatedAt(c.getCreatedAt());
         res.setUpdatedAt(c.getUpdatedAt());
         return res;
