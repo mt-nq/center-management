@@ -12,7 +12,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "your-secret-key"; // TODO: đưa vào config
+    private final String SECRET_KEY = "this-is-a-very-long-secret-key-1234567890"; // TODO: đưa vào config
 
     // ====== ĐỌC THÔNG TIN TỪ TOKEN ======
 

@@ -17,6 +17,8 @@ public class StudentResponse {
     private String hometown;
     private String province;
     private String status;
+    private String email;
+    private String phone;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

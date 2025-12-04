@@ -5,9 +5,12 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,7 +35,7 @@ import java.util.List;
 public class Student {
 
     @OneToOne
-    @JoinColumn(name = "user_id", unique = true)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
     @Id
@@ -55,11 +58,9 @@ public class Student {
     @Column(length = 20)
     private String status; // ACTIVE / INACTIVE
 
-    @CreationTimestamp
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
+
 
     @OneToMany(mappedBy = "student")
     private List<Enrollment> enrollments;    

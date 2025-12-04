@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import java.util.List;
+import java.util.Optional;
 
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
@@ -27,4 +28,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
            WHERE e IS NULL
            """)
     List<Student> findStudentsWithoutAnyEnrollment();
+    @Query("SELECT s FROM Student s WHERE s.user.id = :userId")
+    Optional<Student> findByUserId(Long userId);
+
 }

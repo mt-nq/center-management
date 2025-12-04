@@ -32,6 +32,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(length = 20)
+    private String phone;
+
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -48,13 +51,9 @@ public class User implements UserDetails {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    // thời gian tạo user (dùng trong sort, filter)
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-    // nếu muốn có luôn updated_at thì để thêm, không bắt buộc
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
 
     @PrePersist
     protected void onCreate() {

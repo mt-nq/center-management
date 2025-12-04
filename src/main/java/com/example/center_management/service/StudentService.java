@@ -6,12 +6,14 @@ import com.example.center_management.dto.auth.StudentRegisterRequest;
 import com.example.center_management.dto.request.StudentUpdateRequest;
 import com.example.center_management.dto.response.StudentResponse;
 import org.springframework.data.domain.Page;
-import com.example.center_management.domain.entity.User;
 
+import com.example.center_management.domain.entity.Student;
+import com.example.center_management.domain.entity.User;
+import java.util.Optional;
 
 public interface StudentService {
 
-    StudentResponse createForUser(User user, StudentRegisterRequest request);
+    Student createForUser(User user, StudentRegisterRequest request);
 
     StudentResponse getById(Long id);
 
@@ -21,5 +23,6 @@ public interface StudentService {
 
     void delete(Long id);
 
+    Optional<Student> findByUserId(Long userId);
 }
 

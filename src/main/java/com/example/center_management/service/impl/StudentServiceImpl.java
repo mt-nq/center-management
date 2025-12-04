@@ -1,24 +1,25 @@
 package com.example.center_management.service.impl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import com.example.center_management.domain.entity.Student;
+import com.example.center_management.domain.entity.User;
 import com.example.center_management.dto.auth.StudentRegisterRequest;
 import com.example.center_management.dto.request.StudentUpdateRequest;
 import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.exception.ResourceNotFoundException;
 import com.example.center_management.repository.StudentRepository;
 import com.example.center_management.service.StudentService;
-import com.example.center_management.domain.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,27 +28,36 @@ import lombok.RequiredArgsConstructor;
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     // ================== AUTO TẠO STUDENT KHI ĐĂNG KÝ USER ==================
     @Override
     @Transactional
-    public StudentResponse createForUser(User user, StudentRegisterRequest request) {
+    public Student createForUser(User user, StudentRegisterRequest request) {
         Student student = Student.builder()
-                .fullName(request.getFullName() != null ? request.getFullName() : user.getFullName())
-                .dob(request.getDob())               // 🚀 KHÔNG CÒN null CỨNG
-                .hometown(request.getHometown())
-                .province(request.getProvince())
-                .status("ACTIVE")
-                .user(user)
-                .build();
+            .fullName(request.getFullName() != null ? request.getFullName() : user.getFullName())
+            .dob(request.getDob())
+            .hometown(request.getHometown())
+            .province(request.getProvince())
+            .status("ACTIVE")
+            .user(user)
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
 
+
+        // set code không được null vì DB NOT NULL
         student.setCode(generateStudentCode());
 
-        Student saved = studentRepository.save(student);
-        return toStudentResponse(saved);
+        // trả về entity Student (đúng với interface)
+        return studentRepository.save(student);
+    }
+
+    // dùng cho login: tìm student theo userId
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Student> findByUserId(Long userId) {
+        return studentRepository.findByUserId(userId);
     }
 
     // ================== CÁC HÀM KHÁC ==================
@@ -131,6 +141,12 @@ public class StudentServiceImpl implements StudentService {
         res.setHometown(student.getHometown());
         res.setProvince(student.getProvince());
         res.setStatus(student.getStatus());
+
+        if (student.getUser() != null) {
+        res.setEmail(student.getUser().getEmail());
+        res.setPhone(student.getUser().getPhone());
+        }
+
         return res;
     }
 }
