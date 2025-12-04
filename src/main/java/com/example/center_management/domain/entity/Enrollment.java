@@ -2,6 +2,7 @@ package com.example.center_management.domain.entity;
 
 import java.time.LocalDateTime;
 
+import com.example.center_management.domain.enums.CompletionResult;
 import com.example.center_management.domain.enums.EnrollmentStatus;
 
 import jakarta.persistence.*;
@@ -42,4 +43,11 @@ public class Enrollment {
 
     @OneToOne(mappedBy = "enrollment", fetch = FetchType.LAZY)
     private Certificate certificate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "completion_result")
+    private CompletionResult completionResult = CompletionResult.NOT_REVIEWED;
+
+    @Column(name = "completion_date")
+    private LocalDateTime completionDate;
 }

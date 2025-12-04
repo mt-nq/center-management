@@ -1,5 +1,7 @@
 package com.example.center_management.dto.response;
 
+import com.example.center_management.domain.enums.CompletionResult;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,4 +20,7 @@ public class EnrollmentProgressResponse {
     private long completedVideoLessons;
     private long totalVideoLessons;
     private double progressPercent;  // 0 – 100
+
+    private boolean eligibleForCertificate;
+    private CompletionResult completionResult;
 }

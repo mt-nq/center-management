@@ -15,6 +15,7 @@ import com.example.center_management.domain.entity.Enrollment;
 import com.example.center_management.domain.entity.Student;
 import com.example.center_management.domain.entity.Certificate;
 import com.example.center_management.domain.enums.CertificateResult;
+import com.example.center_management.domain.enums.CompletionResult;
 import com.example.center_management.domain.enums.EnrollmentStatus;
 import com.example.center_management.dto.enrollment.EnrollmentCompletionResponse;
 import com.example.center_management.dto.request.EnrollmentCreateRequest;
@@ -185,28 +186,40 @@ public Page<EnrollmentResponse> getAll(int page, int size) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new NoSuchElementException("Enrollment not found"));
 
-        boolean completed = enrollment.getStatus() == EnrollmentStatus.COMPLETED;
-
-        return new EnrollmentCompletionResponse(
-                enrollment.getId(),
-                enrollment.getStudent().getId(),
-                enrollment.getCourse().getId(),
-                completed
-        );
+        // Trả luôn DTO đầy đủ, không cần tự chế constructor 4 tham số
+        return toCompletionResponse(enrollment);
     }
 
+
+    // ================== ADMIN DUYỆT KẾT QUẢ PASSED / FAILED ==================
     @Override
     @Transactional
-    public void updateCompletionStatus(Long enrollmentId, boolean completed) {
+    public EnrollmentCompletionResponse updateCompletionResult(Long enrollmentId,
+                                                            CompletionResult result) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new NoSuchElementException("Enrollment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Enrollment not found with id: " + enrollmentId));
 
-        if (completed) {
-            enrollment.setStatus(EnrollmentStatus.COMPLETED);
-            enrollment.setCompletedAt(LocalDateTime.now());
-        } else {
-            enrollment.setStatus(EnrollmentStatus.NOT_COMPLETED);
-            enrollment.setCompletedAt(null);
-        }
+        // cập nhật kết quả
+        enrollment.setCompletionResult(result);
+        enrollment.setCompletionDate(LocalDateTime.now());
+
+        Enrollment saved = enrollmentRepository.save(enrollment);
+
+        return toCompletionResponse(saved);
     }
+
+    private EnrollmentCompletionResponse toCompletionResponse(Enrollment enrollment) {
+        EnrollmentCompletionResponse res = new EnrollmentCompletionResponse();
+        res.setEnrollmentId(enrollment.getId());
+        res.setCourseId(enrollment.getCourse().getId());
+        res.setCourseTitle(enrollment.getCourse().getTitle());
+        res.setStudentId(enrollment.getStudent().getId());
+        res.setStudentName(enrollment.getStudent().getFullName());
+        res.setStatus(enrollment.getStatus());
+        res.setResult(enrollment.getCompletionResult());
+        res.setCompletedAt(enrollment.getCompletionDate());
+        return res;
+    }
+
 }

@@ -12,14 +12,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
 
-import com.example.center_management.dto.enrollment.UpdateCompletionStatusRequest;
+import com.example.center_management.dto.enrollment.EnrollmentCompletionResponse;
+import com.example.center_management.dto.enrollment.EnrollmentResultUpdateRequest;
 import com.example.center_management.dto.request.EnrollmentCreateRequest;
-import com.example.center_management.dto.request.EnrollmentResultUpdateRequest;
-import com.example.center_management.dto.certificate.CertificateResponse;
 import com.example.center_management.dto.response.EnrollmentResponse;
 import com.example.center_management.service.EnrollmentService;
-
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -34,14 +33,6 @@ public class EnrollmentController {
         return enrollmentService.enroll(request);
     }
 
-@PutMapping("/{id}/certificate")
-public CertificateResponse update(
-        @PathVariable Long id,
-        @RequestBody EnrollmentResultUpdateRequest request
-) {
-    return enrollmentService.updateResult(id, request);
-}
-
 @GetMapping
     public Page<EnrollmentResponse> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -55,12 +46,14 @@ public CertificateResponse update(
         return enrollmentService.getByStudent(studentId);
     }
 
-    // API cập nhật trạng thái hoàn thành / không hoàn thành
-    @PutMapping("/{id}/completion-status")
-    public void updateCompletionStatus(
-            @PathVariable("id") Long enrollmentId,
-            @RequestBody UpdateCompletionStatusRequest request
+    @PutMapping("/admin/enrollments/{id}/result")
+    public EnrollmentCompletionResponse updateCompletionResult(
+            @PathVariable Long id,
+            @RequestBody EnrollmentResultUpdateRequest request
     ) {
-        enrollmentService.updateCompletionStatus(enrollmentId, request.isCompleted());
+        return enrollmentService.updateCompletionResult(id, request.getResult());
     }
+
+
+
 }

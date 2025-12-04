@@ -25,8 +25,6 @@ public class AdminInitializer implements CommandLineRunner {
                 .username("admin")
                 .password(passwordEncoder.encode("admin"))
                 .role(Role.ADMIN)
-                .email("admin@example.com")
-                .fullName("System Admin")
                 .isActive(true)
                 .build();
 

@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.center_management.dto.enrollment.EnrollmentCompletionResponse;
 import com.example.center_management.dto.request.EnrollmentCreateRequest;
 import com.example.center_management.dto.request.EnrollmentResultUpdateRequest;
+import com.example.center_management.domain.enums.CompletionResult;
 import com.example.center_management.dto.certificate.CertificateResponse;
 import com.example.center_management.dto.response.EnrollmentResponse;
 import com.example.center_management.dto.response.StudentResponse;
@@ -22,7 +23,9 @@ public interface EnrollmentService {
 
     EnrollmentCompletionResponse checkCompletion(Long enrollmentId);
 
-    void updateCompletionStatus(Long enrollmentId, boolean completed);
+    // update kết quả đánh giá cuối (PASSED / FAILED)
+    EnrollmentCompletionResponse updateCompletionResult(Long enrollmentId,CompletionResult result);
+
 
     Page<EnrollmentResponse> getAll(int page, int size);
 }

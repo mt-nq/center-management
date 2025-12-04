@@ -11,7 +11,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/orders")   // 👈 QUAN TRỌNG: trùng đúng với path bạn đang gọi
+@RequestMapping("/api/orders")
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -27,7 +27,7 @@ public class OrderController {
     }
 
     // STUDENT: xem các đơn của mình
-    @GetMapping("/orders/{studentId}")
+    @GetMapping("/me/{studentId}")
     public ResponseEntity<List<OrderResponse>> getOrdersByStudent(
             @PathVariable Long studentId
     ) {
