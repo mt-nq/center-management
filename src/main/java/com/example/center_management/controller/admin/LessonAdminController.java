@@ -1,4 +1,4 @@
-package com.example.center_management.controller;
+package com.example.center_management.controller.admin;
 
 import com.example.center_management.dto.request.LessonCreateRequest;
 import com.example.center_management.dto.response.LessonResponse;

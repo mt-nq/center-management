@@ -1,4 +1,4 @@
-package com.example.center_management.controller;
+package com.example.center_management.controller.user;
 
 import com.example.center_management.dto.request.OrderCreateRequest;
 import com.example.center_management.dto.response.OrderResponse;
@@ -27,7 +27,7 @@ public class OrderController {
     }
 
     // STUDENT: xem các đơn của mình
-    @GetMapping("/student/{studentId}")
+    @GetMapping("/orders/{studentId}")
     public ResponseEntity<List<OrderResponse>> getOrdersByStudent(
             @PathVariable Long studentId
     ) {

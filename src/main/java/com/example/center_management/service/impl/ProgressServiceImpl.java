@@ -104,6 +104,8 @@ public class ProgressServiceImpl implements ProgressService {
                 .enrollmentId(enrollment.getId())
                 .studentId(enrollment.getStudent().getId())
                 .courseId(courseId)
+                .studentName(enrollment.getStudent().getFullName())
+                .courseTitle(enrollment.getCourse().getTitle())
                 .totalVideoLessons(totalVideos)
                 .completedVideoLessons(completedVideos)
                 .progressPercent(percent)

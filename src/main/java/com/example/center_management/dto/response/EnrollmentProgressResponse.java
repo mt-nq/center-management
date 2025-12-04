@@ -12,7 +12,9 @@ public class EnrollmentProgressResponse {
     private Long enrollmentId;
     private Long studentId;
     private Long courseId;
+    private String studentName;
 
+    private String courseTitle;
     private long completedVideoLessons;
     private long totalVideoLessons;
     private double progressPercent;  // 0 – 100

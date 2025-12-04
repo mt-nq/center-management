@@ -1,4 +1,4 @@
-package com.example.center_management.controller;
+package com.example.center_management.controller.admin;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +33,6 @@ public class StudentController {
         return studentService.getAll(page, size);
     }
 
-    // ❌ Không còn PUT ở đây – Admin không được update profile
 
     // Admin xoá (soft delete) student
     @DeleteMapping("/{id}")

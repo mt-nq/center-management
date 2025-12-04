@@ -7,8 +7,9 @@ import com.example.center_management.dto.auth.StudentRegisterRequest;
 import com.example.center_management.dto.response.AuthResponse;
 import com.example.center_management.dto.response.UserSimpleResponse;
 import com.example.center_management.repository.UserRepository;
+import com.example.center_management.security.jwt.JwtService;
 import com.example.center_management.service.AuthService;
-import com.example.center_management.service.JwtService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

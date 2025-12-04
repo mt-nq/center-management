@@ -1,4 +1,4 @@
-package com.example.center_management.controller;
+package com.example.center_management.controller.admin;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -10,9 +10,9 @@ import com.example.center_management.service.CertificateService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/certificates")
+@RequestMapping("/api/admin/certificates")
 @RequiredArgsConstructor
-public class CertificateController {
+public class CertificateAdminController {
 
     private final CertificateService certificateService;
 

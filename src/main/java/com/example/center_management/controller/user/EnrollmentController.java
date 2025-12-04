@@ -1,4 +1,4 @@
-package com.example.center_management.controller;
+package com.example.center_management.controller.user;
 
 import java.util.List;
 
@@ -12,13 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
 
-import com.example.center_management.dto.enrollment.EnrollmentCompletionResponse;
 import com.example.center_management.dto.enrollment.UpdateCompletionStatusRequest;
 import com.example.center_management.dto.request.EnrollmentCreateRequest;
 import com.example.center_management.dto.request.EnrollmentResultUpdateRequest;
 import com.example.center_management.dto.certificate.CertificateResponse;
 import com.example.center_management.dto.response.EnrollmentResponse;
-import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.service.EnrollmentService;
 
 import jakarta.validation.Valid;
@@ -52,19 +50,9 @@ public CertificateResponse update(
         return enrollmentService.getAll(page, size);
     }
 
-    @GetMapping("/by-student/{studentId}")
+    @GetMapping("/all-enrollment/{studentId}")
     public List<EnrollmentResponse> getByStudent(@PathVariable Long studentId) {
         return enrollmentService.getByStudent(studentId);
-    }
-    @GetMapping("/unregistered-students")
-    public List<StudentResponse> getUnregisteredStudents() {
-        return enrollmentService.getStudentsNotEnrolled();
-    }
-
-     // API xem học viên đã hoàn thành khóa chưa
-    @GetMapping("/{id}/completion-status")
-    public EnrollmentCompletionResponse getCompletionStatus(@PathVariable("id") Long enrollmentId) {
-        return enrollmentService.checkCompletion(enrollmentId);
     }
 
     // API cập nhật trạng thái hoàn thành / không hoàn thành

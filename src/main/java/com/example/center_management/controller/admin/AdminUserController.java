@@ -1,4 +1,4 @@
-package com.example.center_management.controller;
+package com.example.center_management.controller.admin;
 
 import java.util.List;
 
@@ -7,6 +7,7 @@ import com.example.center_management.dto.response.UserResponse;
 import com.example.center_management.dto.response.UserSimpleResponse;
 import com.example.center_management.service.AuthService;
 import com.example.center_management.service.UserService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

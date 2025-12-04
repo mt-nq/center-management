@@ -1,4 +1,4 @@
-package com.example.center_management.controller;
+package com.example.center_management.controller.user;
 
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;

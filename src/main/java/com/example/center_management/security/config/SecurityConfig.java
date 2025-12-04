@@ -1,4 +1,4 @@
-package com.example.center_management.config;
+package com.example.center_management.security.config;
 
 import java.util.List;
 

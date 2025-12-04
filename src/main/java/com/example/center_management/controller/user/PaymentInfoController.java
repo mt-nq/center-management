@@ -1,4 +1,4 @@
-package com.example.center_management.controller;
+package com.example.center_management.controller.user;
 
 import com.example.center_management.dto.response.PaymentInfoResponse;
 import org.springframework.http.ResponseEntity;

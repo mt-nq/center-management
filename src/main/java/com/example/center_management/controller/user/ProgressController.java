@@ -1,4 +1,4 @@
-package com.example.center_management.controller;
+package com.example.center_management.controller.user;
 
 import com.example.center_management.dto.request.LessonCompleteRequest;
 import com.example.center_management.dto.response.EnrollmentProgressResponse;
@@ -18,7 +18,7 @@ public class ProgressController {
     private final ProgressService progressService;
 
     // POST /lessons/{lessonId}/complete  (Student)
-    @PostMapping("/lessons/{lessonId}/complete")
+    @PostMapping("/student/lessons/{lessonId}/complete")
     public LessonProgressResponse completeLesson(
             @PathVariable Long lessonId,
             @Valid @RequestBody LessonCompleteRequest request
@@ -27,7 +27,7 @@ public class ProgressController {
     }
 
     // GET /enrollments/{enrollmentId}/progress  (Student)
-    @GetMapping("/enrollments/{enrollmentId}/progress")
+    @GetMapping("/student/enrollments/{enrollmentId}/progress")
     public EnrollmentProgressResponse getProgress(@PathVariable Long enrollmentId) {
         return progressService.getProgress(enrollmentId);
     }

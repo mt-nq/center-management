@@ -1,4 +1,4 @@
-package com.example.center_management.service;
+package com.example.center_management.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
