@@ -6,32 +6,34 @@ import com.example.center_management.domain.enums.CertificateResult;
 
 import jakarta.persistence.*;
 import lombok.*;
+// com.example.center_management.domain.entity.Certificate
 
 @Entity
 @Table(name = "certificates")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Certificate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Mỗi enrollment chỉ có 1 certificate
-    @OneToOne
-    @JoinColumn(name = "enrollment_id", nullable = false, unique = true)
+    // certificate luôn gắn với 1 enrollment
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enrollment_id", nullable = false)
     private Enrollment enrollment;
 
-    @Column(name = "certificate_no", nullable = false, unique = true, length = 50)
-    private String certificateNo;
-
-    @Column(name = "issued_at", nullable = false)
-    private LocalDateTime issuedAt;
-
     @Enumerated(EnumType.STRING)
-    @Column(name = "result", nullable = false, length = 10)
-    private CertificateResult result; // PASS / FAIL
+    @Column(name = "result", nullable = false)
+    private CertificateResult result; // PASSED / FAILED
+
+    @Column(name = "certificate_code", length = 50, unique = true)
+    private String certificateCode;
+
+    @Column(name = "issued_at")
+    private LocalDateTime issuedAt;
 }
+

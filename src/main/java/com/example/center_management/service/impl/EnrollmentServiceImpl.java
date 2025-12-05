@@ -20,7 +20,7 @@ import com.example.center_management.domain.enums.EnrollmentStatus;
 import com.example.center_management.dto.enrollment.EnrollmentCompletionResponse;
 import com.example.center_management.dto.request.EnrollmentCreateRequest;
 import com.example.center_management.dto.request.EnrollmentResultUpdateRequest;
-import com.example.center_management.dto.certificate.CertificateResponse;
+import com.example.center_management.dto.response.CertificateResponse;
 import com.example.center_management.dto.response.EnrollmentResponse;
 import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.exception.ResourceNotFoundException;
@@ -167,14 +167,14 @@ public Page<EnrollmentResponse> getAll(int page, int size) {
 
         // Thông tin chứng chỉ (nếu đã có Certificate)
         Certificate cert = e.getCertificate();
+
         if (cert != null) {
-            // Giả sử EnrollmentResponse có field result (String) & certificateNo
-            res.setResult(cert.getResult() != null ? cert.getResult().name() : null);
-            res.setCertificateNo(cert.getCertificateNo());
+            // dùng ENUM trực tiếp, không .name()
+            res.setResult(cert.getResult());
         } else {
             res.setResult(null);
-            res.setCertificateNo(null);
         }
+
 
         return res;
     }

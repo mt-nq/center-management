@@ -3,9 +3,10 @@ package com.example.center_management.controller.admin;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.center_management.domain.enums.CertificateResult;
-import com.example.center_management.dto.certificate.CertificateResponse;
 import com.example.center_management.dto.certificate.IssueCertificateRequest;
 import com.example.center_management.service.CertificateService;
+import org.springframework.data.domain.Page;
+import com.example.center_management.dto.response.CertificateResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +17,7 @@ public class CertificateAdminController {
 
     private final CertificateService certificateService;
 
-    // Cấp chứng chỉ cho 1 enrollment (đã COMPLETED)
+
     @PostMapping("/enrollment/{enrollmentId}")
     public CertificateResponse issueCertificate(
             @PathVariable Long enrollmentId,
@@ -25,6 +26,13 @@ public class CertificateAdminController {
         CertificateResult result = request.getResult();
         return certificateService.issueCertificate(enrollmentId, result);
     }
+    @GetMapping("/enrollments")
+    public Page<CertificateResponse> getIssuedCertificates(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return certificateService.getAllIssuedCertificates(page, size);
+}
 
-    
+
 }
