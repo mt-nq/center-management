@@ -29,30 +29,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(Customizer.withDefaults())
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .authorizeHttpRequests(auth -> auth
+                .csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests(auth -> auth
                 // mở cho auth
                 .requestMatchers("/api/auth/**").permitAll()
-
                 // admin
                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-
                 // student-side
                 .requestMatchers(
-                    "/api/students/**",
-                    "/api/enrollments/**",
-                    "/api/orders/**",
-                    "/api/student/**",
-                    "/api/progress/**"
+                        "/api/students/**",
+                        "/api/enrollments/**",
+                        "/api/orders/**",
+                        "/api/student/**",
+                        "/api/progress/**"
                 ).hasAuthority("STUDENT")
-
                 // còn lại: cần đăng nhập
                 .anyRequest().authenticated()
-            );
+                );
 
         return http.build();
     }
@@ -69,7 +66,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
         configuration.setAllowedOriginPatterns(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
