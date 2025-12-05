@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -27,13 +26,14 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
+    // Các endpoint swagger cho phép truy cập không cần token
     private static final String[] SWAGGER_WHITELIST = {
-        "/swagger-ui.html",
-        "/swagger-ui/**",
-        "/v3/api-docs/**",
-        "/v3/api-docs",
-        "/swagger-resources/**",
-        "/webjars/**"
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/v3/api-docs",
+            "/swagger-resources/**",
+            "/webjars/**"
     };
 
     @Bean
@@ -44,13 +44,18 @@ public class SecurityConfig {
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authenticationProvider(authenticationProvider)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                // mở cho auth: KHÔNG CẦN TOKEN
+                // Cho phép swagger + api-docs không cần token
+                .requestMatchers(SWAGGER_WHITELIST).permitAll()
+
+                // Auth: login/register không cần token
                 .requestMatchers("/api/auth/**").permitAll()
 
-                // admin
+                // Admin
                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
 
+                // Student (tuỳ bạn dùng role/authority nào)
                 .requestMatchers(
                     "/api/students/**",
                     "/api/enrollments/**",
@@ -59,9 +64,9 @@ public class SecurityConfig {
                     "/api/progress/**"
                 ).hasAuthority("STUDENT")
 
+                // Các request còn lại yêu cầu đã đăng nhập
                 .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            );
 
         return http.build();
     }
@@ -78,9 +83,10 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
 
+        // Cho FE local
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
 
-        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
 
