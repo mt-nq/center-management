@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/admin/students")
 @RequiredArgsConstructor
-public class StudentController {
+public class AdminStudentController {
 
     private final StudentService studentService;
 

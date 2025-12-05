@@ -12,17 +12,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-public class UserController {
+public class UserMeController {
 
     private final UserService userService;
 
     @PostMapping
     public UserResponse create(@Valid @RequestBody UserCreateRequest request) {
         return userService.create(request);
-    }
-
-    @GetMapping
-    public List<UserResponse> getAll() {
-        return userService.getAll();
     }
 }
