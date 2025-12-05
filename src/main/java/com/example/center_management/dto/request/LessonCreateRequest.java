@@ -13,4 +13,6 @@ public class LessonCreateRequest {
 
     @NotBlank
     private String type; // VIDEO / QUIZ / DOCUMENT...
+
+    private String urlVid;
 }

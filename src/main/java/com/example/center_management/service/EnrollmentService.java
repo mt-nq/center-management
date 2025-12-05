@@ -28,4 +28,7 @@ public interface EnrollmentService {
 
 
     Page<EnrollmentResponse> getAll(int page, int size);
+
+    Page<EnrollmentCompletionResponse> getEnrollmentsWithFullProgress(int page, int size);
+
 }

@@ -64,8 +64,16 @@ public class StudentServiceImpl implements StudentService {
     @Override
     @Transactional(readOnly = true)
     public StudentResponse getById(Long id) {
+
+        System.out.println(">>> getById(" + id + ")");
+
+        studentRepository.findAll().forEach(s -> {
+            System.out.println(" - student in DB: id=" + s.getId() + ", code=" + s.getCode());
+        });
+
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
         return toStudentResponse(student);
     }
 
@@ -118,10 +126,17 @@ public class StudentServiceImpl implements StudentService {
     @Override
     @Transactional
     public void delete(Long id) {
+        System.out.println(">>> StudentServiceImpl.delete(" + id + ")");
+        // log tất cả student cho chắc luôn:
+        studentRepository.findAll().forEach(s ->
+                System.out.println(" - student in DB: id=" + s.getId() +
+                                   ", code=" + s.getCode() +
+                                   ", status=" + s.getStatus())
+        );
+
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
-        // Soft delete: chỉ đổi trạng thái
         student.setStatus("INACTIVE");
         studentRepository.save(student);
     }

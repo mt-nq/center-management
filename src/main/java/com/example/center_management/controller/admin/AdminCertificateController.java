@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/admin/certificates")
 @RequiredArgsConstructor
-public class CertificateAdminController {
+public class AdminCertificateController {
 
     private final CertificateService certificateService;
 

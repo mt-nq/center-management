@@ -1,23 +1,24 @@
 package com.example.center_management.dto.response;
 
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
-import com.example.center_management.domain.enums.CertificateResult;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor   // <-- để dùng new CertificateResponse(...)
-@NoArgsConstructor
+@Getter
+@Setter
 public class CertificateResponse {
 
-    private Long id;
     private Long enrollmentId;
-    private Long studentId;
-    private Long courseId;
 
+    private Long studentId;
+    private String studentCode;
+    private String studentName;
+
+    private Long courseId;
+    private String courseCode;
+    private String courseTitle;
+
+    private String result;
     private String certificateCode;
     private LocalDateTime issuedAt;
-    private CertificateResult result;
 }

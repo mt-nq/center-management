@@ -33,27 +33,26 @@ public class OrderServiceImpl implements OrderService {
 
     // ================== STUDENT: TẠO ĐƠN HÀNG ==================
     @Override
-    @Transactional
-    public OrderResponse createOrder(OrderCreateRequest request) {
-        Student student = studentRepository.findById(request.getStudentId())
+    public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
+        // Lấy student từ id đã resolve từ JWT
+        Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        // amount: lấy theo giá khóa học (nếu muốn)
-        Order order = Order.builder()
-                .student(student)
-                .course(course)
-                .amount(course.getPrice())                 // 👈 dùng amount trong entity Order
-                .paymentStatus(PaymentStatus.PENDING)      // đang chờ xác nhận thanh toán
-                .approvalStatus(ApprovalStatus.PENDING)    // chờ admin duyệt
-                .createdAt(LocalDateTime.now())
-                .build();
+        Order order = new Order();
+        order.setStudent(student);
+        order.setCourse(course);
+        order.setPaymentStatus(PaymentStatus.PENDING);
+        order.setApprovalStatus(ApprovalStatus.PENDING);
+        order.setCreatedAt(LocalDateTime.now());
 
-        order = orderRepository.save(order);
+        orderRepository.save(order);
+
         return toResponse(order);
     }
+
 
     // ================== ADMIN: LẤY ĐƠN CHỜ DUYỆT ==================
     @Override

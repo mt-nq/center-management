@@ -1,15 +1,12 @@
 package com.example.center_management.controller.admin;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Page;
-
 import com.example.center_management.dto.request.StudentUpdateRequest;
 import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.service.StudentService;
-
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/students")
@@ -18,25 +15,28 @@ public class AdminStudentController {
 
     private final StudentService studentService;
 
-    // Admin xem chi tiết 1 student
-    @GetMapping("/{id}")
-    public StudentResponse getById(@PathVariable Long id) {
-        return studentService.getById(id);
-    }
-
-    // Admin xem danh sách student (phân trang)
+    // GET /api/admin/students?page=0&size=10
     @GetMapping
-    public Page<StudentResponse> getAll(
+    public ResponseEntity<Page<StudentResponse>> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "10") int size
     ) {
-        return studentService.getAll(page, size);
+        Page<StudentResponse> res = studentService.getAll(page, size);
+        return ResponseEntity.ok(res);
     }
 
+    // GET /api/admin/students/{id}
+    @GetMapping("/{id}")
+    public ResponseEntity<StudentResponse> getById(@PathVariable("id") Long id) {
+        System.out.println(">>> GET student id = " + id);
+        StudentResponse res = studentService.getById(id);
+        return ResponseEntity.ok(res);
+    }
 
-    // Admin xoá (soft delete) student
+    // DELETE /api/admin/students/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
+        System.out.println(">>> DELETE student id = " + id);
         studentService.delete(id);
         return ResponseEntity.noContent().build();
     }

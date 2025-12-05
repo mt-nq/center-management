@@ -10,10 +10,6 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class OrderCreateRequest {
-
-    @NotNull
-    private Long studentId;
-
     @NotNull
     private Long courseId;
 }

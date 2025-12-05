@@ -8,7 +8,7 @@ import java.util.List;
 public interface OrderService {
 
     // POST /orders
-    OrderResponse createOrder(OrderCreateRequest request);
+    OrderResponse createOrder(Long studentId, OrderCreateRequest request);
 
     // GET /admin/orders/pending
     List<OrderResponse> getPendingOrders();

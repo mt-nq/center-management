@@ -12,7 +12,11 @@ import java.time.LocalDateTime;
 public class LessonProgressResponse {
 
     private Long enrollmentId;
+
     private Long lessonId;
+    private String lessonName;
+    private Integer lessonOrder;
+
     private boolean completed;
     private LocalDateTime completedAt;
 }

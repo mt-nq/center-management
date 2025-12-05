@@ -79,7 +79,12 @@ public class ProgressServiceImpl implements ProgressService {
                 enrollment.setStatus(EnrollmentStatus.COMPLETED);
                 enrollment.setCompletedAt(LocalDateTime.now());
                 enrollmentRepository.save(enrollment);
-            }
+        }
+             if (enrollment.getCompletionResult() == null) {
+        enrollment.setCompletionResult(CompletionResult.NOT_REVIEWED);
+        } 
+
+        enrollmentRepository.save(enrollment);
         } else {
             // nếu muốn cho phép “tụt %” thì có thể cho quay lại ENROLLED/NOT_COMPLETED
             if (enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
@@ -92,6 +97,7 @@ public class ProgressServiceImpl implements ProgressService {
         return LessonProgressResponse.builder()
                 .enrollmentId(enrollmentId)
                 .lessonId(lessonId)
+                .lessonName(lesson.getTitle())
                 .completed(progress.isCompleted())
                 .completedAt(progress.getCompletedAt())
                 .build();
@@ -140,7 +146,7 @@ public class ProgressServiceImpl implements ProgressService {
                 .courseTitle(enrollment.getCourse().getTitle())
                 .totalVideoLessons(totalVideos)
                 .completedVideoLessons(completedVideos)
-                .progressPercent(percent)
+                .progressPercentage(percent)
                 // ✅ đủ điều kiện xét chứng chỉ
                 .eligibleForCertificate(eligible)
                 // ✅ kết quả admin duyệt (NOT_REVIEWED / PASSED / FAILED)
@@ -148,7 +154,8 @@ public class ProgressServiceImpl implements ProgressService {
                 .build();
     }
 
-    // ================== LẤY DS ENROLLMENT ĐỦ 100% CHƯA REVIEW ==================@Override
+    // ================== LẤY DS ENROLLMENT ĐỦ 100% CHƯA REVIEW ==================
+        @Override
         @Transactional(readOnly = true)
         public List<EnrollmentProgressResponse> getEnrollmentsWithFullProgress() {
         return enrollmentRepository.findAll()

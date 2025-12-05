@@ -29,10 +29,8 @@ public class OrderController {
         String username = authentication.getName();
         Long studentId = studentService.findStudentIdByUsername(username);
 
-        // bảo vệ: không cho FE fake studentId
-        request.setStudentId(studentId);
+        OrderResponse response = orderService.createOrder(studentId, request);
 
-        OrderResponse response = orderService.createOrder(request);
         return ResponseEntity.ok(response);
     }
 

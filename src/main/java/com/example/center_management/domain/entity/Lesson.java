@@ -25,4 +25,7 @@ public class Lesson {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;
+
+    @Column(name = "url_vid")
+    private String urlVid;
 }

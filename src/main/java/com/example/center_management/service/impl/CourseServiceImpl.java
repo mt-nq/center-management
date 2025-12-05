@@ -173,6 +173,7 @@ public class CourseServiceImpl implements CourseService {
                 .title(request.getTitle())
                 .type(request.getType())
                 .chapter(chapter)
+                .urlVid(request.getUrlVid())
                 .build();
 
         lessonRepository.save(lesson);
@@ -245,6 +246,7 @@ public class CourseServiceImpl implements CourseService {
                 .id(lesson.getId())
                 .title(lesson.getTitle())
                 .type(lesson.getType())
+                .urlVid(lesson.getUrlVid())
                 .build();
     }
 }

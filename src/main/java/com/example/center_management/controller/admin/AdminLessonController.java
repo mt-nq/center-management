@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/admin/chapters")
 @RequiredArgsConstructor
-public class LessonAdminController {
+public class AdminLessonController {
 
     private final CourseService courseService;
 

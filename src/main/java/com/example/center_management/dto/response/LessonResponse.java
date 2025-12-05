@@ -11,4 +11,5 @@ public class LessonResponse {
     private Long id;
     private String title;
     private String type;
+    private String urlVid;
 }

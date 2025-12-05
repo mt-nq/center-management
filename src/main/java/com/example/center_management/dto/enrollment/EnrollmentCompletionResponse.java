@@ -26,4 +26,8 @@ public class EnrollmentCompletionResponse {
     private CompletionResult result;
 
     private LocalDateTime completedAt;
+
+    private boolean certificateIssued;
+    private String certificateCode;
+    private LocalDateTime certificateIssuedAt;
 }

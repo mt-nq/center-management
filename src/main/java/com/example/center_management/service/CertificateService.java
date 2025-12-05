@@ -1,5 +1,6 @@
 package com.example.center_management.service;
 
+import com.example.center_management.domain.entity.Enrollment;
 import com.example.center_management.domain.enums.CertificateResult;
 import com.example.center_management.dto.response.CertificateResponse;
 import org.springframework.data.domain.Page;
@@ -17,4 +18,6 @@ public interface CertificateService {
 
     // 👉 Dùng cho student: xem chi tiết 1 chứng chỉ thuộc enrollment
     CertificateResponse getCertificateDetailOfStudent(Long studentId, Long enrollmentId);
+
+    void syncFromEnrollment(Enrollment enrollment);
 }
