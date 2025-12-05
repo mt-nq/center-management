@@ -15,5 +15,5 @@ public class UserSimpleResponse {
 
     private Long id;
     private String username;
-    private String role; 
-} //student id student name 
+    private String role;
+}
