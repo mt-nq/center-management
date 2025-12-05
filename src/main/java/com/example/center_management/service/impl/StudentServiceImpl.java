@@ -149,4 +149,14 @@ public class StudentServiceImpl implements StudentService {
 
         return res;
     }
+
+    @Override
+    public Long findStudentIdByUsername(String username) {
+        Student student = studentRepository.findByUserUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Student not found for username: " + username
+                ));
+        return student.getId();
+    }
+
 }

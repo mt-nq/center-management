@@ -61,7 +61,6 @@ public class AuthServiceImpl implements AuthService {
         return AuthResponse.builder()
                 .token(token)
                 .user(userResponse)
-                .studentId(student.getId())
                 .build();
     }
 

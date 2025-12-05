@@ -3,8 +3,10 @@ package com.example.center_management.controller.user;
 import com.example.center_management.dto.request.OrderCreateRequest;
 import com.example.center_management.dto.response.OrderResponse;
 import com.example.center_management.service.OrderService;
+import com.example.center_management.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -16,21 +18,29 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final StudentService studentService;
 
-    // STUDENT: bấm nút Thanh toán -> tạo order
+    // POST /api/orders  -> tạo order cho student đang login
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(
+            Authentication authentication,
             @Valid @RequestBody OrderCreateRequest request
     ) {
+        String username = authentication.getName();
+        Long studentId = studentService.findStudentIdByUsername(username);
+
+        // bảo vệ: không cho FE fake studentId
+        request.setStudentId(studentId);
+
         OrderResponse response = orderService.createOrder(request);
         return ResponseEntity.ok(response);
     }
 
-    // STUDENT: xem các đơn của mình
-    @GetMapping("/me/{studentId}")
-    public ResponseEntity<List<OrderResponse>> getOrdersByStudent(
-            @PathVariable Long studentId
-    ) {
+    // GET /api/orders/me  -> danh sách đơn của chính mình
+    @GetMapping("/me")
+    public ResponseEntity<List<OrderResponse>> getMyOrders(Authentication authentication) {
+        String username = authentication.getName();
+        Long studentId = studentService.findStudentIdByUsername(username);
         return ResponseEntity.ok(orderService.getOrdersByStudent(studentId));
     }
 }

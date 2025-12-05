@@ -5,6 +5,7 @@ import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,18 +15,22 @@ public class StudentMeController {
 
     private final StudentService studentService;
 
-    // Student xem thông tin của chính mình
+    // Lấy thông tin profile từ JWT
     @GetMapping("/me")
-    public StudentResponse getMyProfile(@RequestParam Long studentId) {
+    public StudentResponse getMyProfile(Authentication authentication) {
+        String username = authentication.getName();
+        Long studentId = studentService.findStudentIdByUsername(username);
         return studentService.getById(studentId);
     }
 
-    // Student tự cập nhật thông tin cá nhân
+    // Cập nhật profile từ JWT
     @PutMapping("/me")
     public StudentResponse updateMyProfile(
-            @RequestParam Long studentId,
+            Authentication authentication,
             @Valid @RequestBody StudentUpdateRequest request
     ) {
+        String username = authentication.getName();
+        Long studentId = studentService.findStudentIdByUsername(username);
         return studentService.update(studentId, request);
     }
 }
