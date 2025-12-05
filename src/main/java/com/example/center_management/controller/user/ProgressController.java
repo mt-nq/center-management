@@ -32,12 +32,13 @@ public class ProgressController {
         return progressService.getProgress(enrollmentId);
     }
 
-    // GET /admin/enrollments/{enrollmentId}/progress  (Admin)
-    @GetMapping("/admin/enrollments/{enrollmentId}/progress")
+    // GET /admin/enrollments/{enrollmentId}/progress  (chung)
+    @GetMapping("/enrollments/{enrollmentId}/progress")
     public EnrollmentProgressResponse getProgressForAdmin(@PathVariable Long enrollmentId) {
         return progressService.getProgressForAdmin(enrollmentId);
     }
-    @GetMapping("/admin/enrollments/ready-for-certificate")
+
+    @GetMapping("/enrollments/ready-for-certificate")
     public List<EnrollmentProgressResponse> getEnrollmentsReadyForCertificate() {
         return progressService.getEnrollmentsWithFullProgress();
     }

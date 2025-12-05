@@ -13,7 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserSimpleResponse {
 
-    private Long id;
+    private Long studentId;
+    private Long studentName;
     private String username;
-    private String role; 
+    private String role;
 }
