@@ -16,6 +16,10 @@ import com.example.center_management.repository.StudentRepository;
 import com.example.center_management.service.EnrollmentService;
 import com.example.center_management.service.OrderService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +28,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -53,7 +58,6 @@ public class OrderServiceImpl implements OrderService {
         return toResponse(order);
     }
 
-
     // ================== ADMIN: LẤY ĐƠN CHỜ DUYỆT ==================
     @Override
     @Transactional(readOnly = true)
@@ -66,7 +70,6 @@ public class OrderServiceImpl implements OrderService {
 
     // ================== ADMIN: DUYỆT ĐƠN ==================
     @Override
-    @Transactional
     public OrderResponse approveOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -95,7 +98,6 @@ public class OrderServiceImpl implements OrderService {
 
     // ================== ADMIN: TỪ CHỐI ĐƠN ==================
     @Override
-    @Transactional
     public OrderResponse rejectOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -125,6 +127,16 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
     }
 
+    // ================== ADMIN: LẤY TẤT CẢ ĐƠN (CÓ PHÂN TRANG) ==================
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> getAllOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> orders = orderRepository.findAll(pageable);
+        // Dùng lại hàm toResponse cho đồng nhất
+        return orders.map(this::toResponse);
+    }
+
     // ================== HELPER ==================
     private OrderResponse toResponse(Order order) {
         OrderResponse res = new OrderResponse();
@@ -133,14 +145,18 @@ public class OrderServiceImpl implements OrderService {
         if (order.getStudent() != null) {
             res.setStudentId(order.getStudent().getId());
             res.setStudentName(order.getStudent().getFullName());
+            // nếu OrderResponse có studentCode thì set thêm ở đây
+            // res.setStudentCode(order.getStudent().getStudentCode());
         }
 
         if (order.getCourse() != null) {
             res.setCourseId(order.getCourse().getId());
             res.setCourseTitle(order.getCourse().getTitle());
+            // nếu OrderResponse có courseCode thì set thêm ở đây
+            // res.setCourseCode(order.getCourse().getCourseCode());
         }
 
-        // 👇 KHỚP VỚI ENTITY Order: dùng amount thay vì totalAmount
+        // entity của bạn đang dùng amount
         res.setTotalAmount(order.getAmount());
 
         res.setPaymentStatus(order.getPaymentStatus());
@@ -153,6 +169,7 @@ public class OrderServiceImpl implements OrderService {
                 ? order.getStudent().getId().toString()
                 : "UNKNOWN";
 
+        // Gợi ý nội dung chuyển khoản
         res.setTransferNote("ORDER-" + order.getId() + "-STUDENT-" + studentPart);
 
         return res;

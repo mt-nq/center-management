@@ -32,6 +32,7 @@ import com.example.center_management.repository.StudentRepository;
 import com.example.center_management.service.CertificateService;
 import com.example.center_management.service.EnrollmentService;
 import com.example.center_management.service.ProgressService;
+import com.example.center_management.dto.response.StudentLearningHistoryResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -271,6 +272,61 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 );
 
         return enrollmentPage.map(this::toCompletionResponse);
+    }
+
+        @Override
+    @Transactional(readOnly = true)
+    public StudentLearningHistoryResponse getStudentLearningHistory(Long studentId) {
+        // 1. Tìm student để lấy thông tin + check tồn tại
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Student not found with id = " + studentId
+                ));
+
+        // 2. Lấy danh sách enrollment của student (dùng method getByStudent đã có)
+        List<EnrollmentResponse> enrollments = getByStudent(studentId);
+
+        int total = enrollments.size();
+
+        // 3. Tính toán thống kê
+        int completed = (int) enrollments.stream()
+                .filter(e -> e.getStatus() == EnrollmentStatus.COMPLETED)
+                .count();
+
+        int certificateCount = (int) enrollments.stream()
+                .filter(e -> e.getCertificateCode() != null)
+                .count();
+
+        int passedCount = (int) enrollments.stream()
+                .filter(e -> e.getResult() != null
+                        && e.getResult() == CertificateResult.PASS)
+                .count();
+
+        int failedCount = (int) enrollments.stream()
+                .filter(e -> e.getResult() != null
+                        && e.getResult() == CertificateResult.FAIL)
+                .count();
+
+        double averageProgress = enrollments.stream()
+                .mapToDouble(e -> e.getProgressPercentage() != null
+                        ? e.getProgressPercentage()
+                        : 0.0)
+                .average()
+                .orElse(0.0);
+
+        // 4. Build response
+        return StudentLearningHistoryResponse.builder()
+                .studentId(student.getId())
+                .studentCode(student.getCode())
+                .studentName(student.getFullName())
+                .totalEnrollments(total)
+                .completedEnrollments(completed)
+                .certificateCount(certificateCount)
+                .passedCount(passedCount)
+                .failedCount(failedCount)
+                .averageProgress(averageProgress)
+                .enrollments(enrollments)
+                .build();
     }
 
 

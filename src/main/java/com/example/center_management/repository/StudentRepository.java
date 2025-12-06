@@ -33,4 +33,23 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByUserUsername(String username);
 
+    interface LocationStat {
+        String getName();
+        Long getCount();
+    }
+
+  @Query("""
+          SELECT s.hometown AS name, COUNT(s) AS count
+          FROM Student s
+          GROUP BY s.hometown
+          """)
+  List<LocationStat> countByHometown();
+
+  @Query("""
+          SELECT s.province AS name, COUNT(s) AS count
+          FROM Student s
+          GROUP BY s.province
+          """)
+  List<LocationStat> countByProvince();
+
 }

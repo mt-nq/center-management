@@ -78,17 +78,15 @@ public class ProgressServiceImpl implements ProgressService {
             if (enrollment.getStatus() != EnrollmentStatus.COMPLETED) {
                 enrollment.setStatus(EnrollmentStatus.COMPLETED);
                 enrollment.setCompletedAt(LocalDateTime.now());
-                enrollmentRepository.save(enrollment);
         }
-             if (enrollment.getCompletionResult() == null) {
-        enrollment.setCompletionResult(CompletionResult.NOT_REVIEWED);
+        if (enrollment.getCompletionResult() == null) {
+                enrollment.setCompletionResult(CompletionResult.NOT_REVIEWED);
         } 
 
         enrollmentRepository.save(enrollment);
         } else {
-            // nếu muốn cho phép “tụt %” thì có thể cho quay lại ENROLLED/NOT_COMPLETED
             if (enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
-                enrollment.setStatus(EnrollmentStatus.ENROLLED); // hoặc NOT_COMPLETED tùy bạn
+                enrollment.setStatus(EnrollmentStatus.NOT_COMPLETED); 
                 enrollment.setCompletedAt(null);
                 enrollmentRepository.save(enrollment);
             }
@@ -171,4 +169,12 @@ public class ProgressServiceImpl implements ProgressService {
                 .collect(Collectors.toList());
         }
 
+        @Override
+        @Transactional(readOnly = true)
+        public List<EnrollmentProgressResponse> getAllEnrollmentProgressForAdmin() {
+                return enrollmentRepository.findAll()
+                        .stream()
+                        .map(enrollment -> buildProgressResponse(enrollment.getId()))
+                        .collect(Collectors.toList());
+        }
 }

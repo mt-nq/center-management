@@ -4,7 +4,7 @@ import com.example.center_management.dto.response.OrderResponse;
 import com.example.center_management.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.data.domain.Page;
 import java.util.List;
 
 @RestController
@@ -13,6 +13,14 @@ import java.util.List;
 public class AdminOrderController {
 
     private final OrderService orderService;
+
+    @GetMapping("/all")
+    public Page<OrderResponse> getAllOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return orderService.getAllOrders(page, size);
+    }
 
     // ========== GET /admin/orders/pending ==========
     @GetMapping("/pending")

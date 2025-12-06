@@ -6,7 +6,6 @@ import com.example.center_management.domain.enums.CertificateResult;
 
 import jakarta.persistence.*;
 import lombok.*;
-// com.example.center_management.domain.entity.Certificate
 
 @Entity
 @Table(name = "certificates")
@@ -21,9 +20,9 @@ public class Certificate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // certificate luôn gắn với 1 enrollment
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "enrollment_id", nullable = false)
+    // Mỗi enrollment có tối đa 1 certificate
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enrollment_id", nullable = false, unique = true)
     private Enrollment enrollment;
 
     @Enumerated(EnumType.STRING)
@@ -36,4 +35,3 @@ public class Certificate {
     @Column(name = "issued_at")
     private LocalDateTime issuedAt;
 }
-

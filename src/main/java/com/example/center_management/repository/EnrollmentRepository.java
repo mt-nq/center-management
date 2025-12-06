@@ -23,4 +23,5 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             @Param("result") CompletionResult result,
             Pageable pageable
     );
+
 }

@@ -8,6 +8,7 @@ import com.example.center_management.dto.request.EnrollmentResultUpdateRequest;
 import com.example.center_management.domain.enums.CompletionResult;
 import com.example.center_management.dto.response.CertificateResponse;
 import com.example.center_management.dto.response.EnrollmentResponse;
+import com.example.center_management.dto.response.StudentLearningHistoryResponse;
 import com.example.center_management.dto.response.StudentResponse;
 import org.springframework.data.domain.Page;
 
@@ -31,4 +32,5 @@ public interface EnrollmentService {
 
     Page<EnrollmentCompletionResponse> getEnrollmentsWithFullProgress(int page, int size);
 
+    StudentLearningHistoryResponse getStudentLearningHistory(Long studentId);
 }

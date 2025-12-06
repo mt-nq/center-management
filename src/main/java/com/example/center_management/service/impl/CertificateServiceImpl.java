@@ -148,6 +148,32 @@ public class CertificateServiceImpl implements CertificateService {
         return certPage.map(this::toResponse);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CertificateResponse> getCertificateHistory(
+            int page,
+            int size,
+            String keyword,
+            CertificateResult result
+    ) {
+        var pageable = PageRequest.of(page, size);
+
+        String pattern = null;
+        if (keyword != null && !keyword.isBlank()) {
+            pattern = "%" + keyword.trim() + "%";
+        }
+
+        Page<Certificate> certPage = certificateRepository
+                .searchCertificateHistory(
+                        pattern,
+                        result,
+                        pageable
+                );
+
+        return certPage.map(this::toResponse);
+    }
+
+
     private CertificateResponse toResponse(Certificate certificate) {
     if (certificate == null) {
         return null;

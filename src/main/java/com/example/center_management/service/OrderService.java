@@ -2,6 +2,7 @@ package com.example.center_management.service;
 
 import com.example.center_management.dto.request.OrderCreateRequest;
 import com.example.center_management.dto.response.OrderResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -20,4 +21,7 @@ public interface OrderService {
     OrderResponse rejectOrder(Long orderId);
 
     List<OrderResponse> getOrdersByStudent(Long studentId);
+
+    Page<OrderResponse> getAllOrders(int page, int size);
+
 }

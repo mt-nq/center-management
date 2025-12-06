@@ -20,4 +20,11 @@ public interface CertificateService {
     CertificateResponse getCertificateDetailOfStudent(Long studentId, Long enrollmentId);
 
     void syncFromEnrollment(Enrollment enrollment);
+    
+    Page<CertificateResponse> getCertificateHistory(
+            int page,
+            int size,
+            String keyword,
+            CertificateResult result
+    );
 }
