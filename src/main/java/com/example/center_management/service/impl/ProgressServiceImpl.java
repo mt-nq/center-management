@@ -49,9 +49,9 @@ public class ProgressServiceImpl implements ProgressService {
         LessonProgress progress = lessonProgressRepository
                 .findByEnrollment_IdAndLesson_Id(enrollmentId, lessonId)
                 .orElseGet(() -> LessonProgress.builder()
-                        .enrollment(enrollment)
-                        .lesson(lesson)
-                        .build()
+                .enrollment(enrollment)
+                .lesson(lesson)
+                .build()
                 );
 
         progress.setCompleted(true);
@@ -79,12 +79,12 @@ public class ProgressServiceImpl implements ProgressService {
                 enrollment.setStatus(EnrollmentStatus.COMPLETED);
                 enrollment.setCompletedAt(LocalDateTime.now());
                 enrollmentRepository.save(enrollment);
-        }
-             if (enrollment.getCompletionResult() == null) {
-        enrollment.setCompletionResult(CompletionResult.NOT_REVIEWED);
-        } 
+            }
+            if (enrollment.getCompletionResult() == null) {
+                enrollment.setCompletionResult(CompletionResult.NOT_REVIEWED);
+            }
 
-        enrollmentRepository.save(enrollment);
+            enrollmentRepository.save(enrollment);
         } else {
             // nếu muốn cho phép “tụt %” thì có thể cho quay lại ENROLLED/NOT_COMPLETED
             if (enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
@@ -155,20 +155,27 @@ public class ProgressServiceImpl implements ProgressService {
     }
 
     // ================== LẤY DS ENROLLMENT ĐỦ 100% CHƯA REVIEW ==================
-        @Override
-        @Transactional(readOnly = true)
-        public List<EnrollmentProgressResponse> getEnrollmentsWithFullProgress() {
+    @Override
+    @Transactional(readOnly = true)
+    public List<EnrollmentProgressResponse> getEnrollmentsWithFullProgress() {
         return enrollmentRepository.findAll()
                 .stream()
                 .map(enrollment -> buildProgressResponse(enrollment.getId()))
-                .filter(resp ->
-                        resp.isEligibleForCertificate()
-                        && (
-                                resp.getCompletionResult() == null
-                                || resp.getCompletionResult() == CompletionResult.NOT_REVIEWED
-                        )
+                .filter(resp
+                        -> resp.isEligibleForCertificate()
+                && (resp.getCompletionResult() == null
+                || resp.getCompletionResult() == CompletionResult.NOT_REVIEWED)
                 )
                 .collect(Collectors.toList());
-        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EnrollmentProgressResponse> getAllEnrollmentProgressForAdmin() {
+        return enrollmentRepository.findAll()
+                .stream()
+                .map(enrollment -> buildProgressResponse(enrollment.getId()))
+                .collect(Collectors.toList());
+    }
 
 }
