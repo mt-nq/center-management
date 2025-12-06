@@ -18,7 +18,7 @@ public class AdminProgressController {
         return progressService.getProgressForAdmin(enrollmentId);
     }
 
-    @GetMapping("/admin/enrollments/progress")
+    @GetMapping("/enrollments/progress")
     public List<EnrollmentProgressResponse> getAllProgressForAdmin() {
         return progressService.getAllEnrollmentProgressForAdmin();
     }
