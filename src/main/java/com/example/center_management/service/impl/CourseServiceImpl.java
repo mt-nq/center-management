@@ -113,6 +113,7 @@ public class CourseServiceImpl implements CourseService {
         course.setStartDate(request.getStartDate());
         course.setEndDate(request.getEndDate());
         course.setContent(request.getContent());
+        course.setPrice(request.getPrice()); 
 
         Course updated = courseRepository.saveAndFlush(course);
 

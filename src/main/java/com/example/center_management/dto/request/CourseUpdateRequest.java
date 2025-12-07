@@ -1,5 +1,6 @@
 package com.example.center_management.dto.request;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotBlank;
@@ -21,4 +22,7 @@ public class CourseUpdateRequest {
     private LocalDate endDate;
 
     private String content;
+
+    @NotNull
+    private BigDecimal price;
 }
