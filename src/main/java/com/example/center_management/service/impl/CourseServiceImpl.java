@@ -273,7 +273,6 @@ public class CourseServiceImpl implements CourseService {
         return ChapterResponse.builder()
                 .id(chapter.getId())
                 .title(chapter.getTitle())
-                .description(chapter.getDescription())
                 .lessons(
                         chapter.getLessons().stream()
                                 .map(this::toLessonResponse)
