@@ -7,9 +7,11 @@ import com.example.center_management.domain.entity.Chapter;
 import com.example.center_management.domain.entity.Course;
 import com.example.center_management.domain.entity.Lesson;
 import com.example.center_management.dto.request.ChapterCreateRequest;
+import com.example.center_management.dto.request.ChapterUpdateRequest;
 import com.example.center_management.dto.request.CourseCreateRequest;
 import com.example.center_management.dto.request.CourseUpdateRequest;
 import com.example.center_management.dto.request.LessonCreateRequest;
+import com.example.center_management.dto.request.LessonUpdateRequest;
 import com.example.center_management.dto.response.ChapterResponse;
 import com.example.center_management.dto.response.CourseResponse;
 import com.example.center_management.dto.response.CourseStructureResponse;
@@ -42,7 +44,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public CourseResponse create(CourseCreateRequest request) {
-        // Chỉ validate khi cả 2 ngày đều khác null
         validateDates(request.getStartDate(), request.getEndDate());
 
         Course course = Course.builder()
@@ -102,8 +103,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public CourseResponse update(Long id, CourseUpdateRequest request) {
-        // CourseUpdateRequest nhiều khả năng vẫn có start/endDate,
-        // nên ta cũng dùng validateDates nhưng an toàn với null
         validateDates(request.getStartDate(), request.getEndDate());
 
         Course course = courseRepository.findById(id)
@@ -123,30 +122,18 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public void delete(Long id) {
-        // ❗ Soft delete: không xóa khỏi DB, chỉ INACTIVE
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("course not found"));
 
-        if ("INACTIVE".equalsIgnoreCase(course.getStatus())) {
-            return; // hoặc throw exception tùy nghiệp vụ
-        }
+        if ("INACTIVE".equalsIgnoreCase(course.getStatus())) return;
 
         course.setStatus("INACTIVE");
         courseRepository.save(course);
     }
 
     // ============================================================
-    // API mới: structure, addChapter, addLesson
+    // Chapter
     // ============================================================
-
-    @Override
-    @Transactional(readOnly = true)
-    public CourseStructureResponse getStructure(Long id) {
-        Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
-
-        return toCourseStructure(course);
-    }
 
     @Override
     @Transactional
@@ -160,9 +147,33 @@ public class CourseServiceImpl implements CourseService {
                 .build();
 
         chapterRepository.save(chapter);
-
         return toChapterResponse(chapter);
     }
+
+    @Override
+    @Transactional
+    public ChapterResponse updateChapter(Long chapterId, ChapterUpdateRequest request) {
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chapter not found"));
+
+        chapter.setTitle(request.getTitle());
+
+        chapterRepository.save(chapter);
+        return toChapterResponse(chapter);
+    }
+
+    @Override
+    @Transactional
+    public void deleteChapter(Long chapterId) {
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chapter not found"));
+
+        chapterRepository.delete(chapter);
+    }
+
+    // ============================================================
+    // Lesson
+    // ============================================================
 
     @Override
     @Transactional
@@ -178,19 +189,47 @@ public class CourseServiceImpl implements CourseService {
                 .build();
 
         lessonRepository.save(lesson);
-
         return toLessonResponse(lesson);
     }
 
+    @Override
+    @Transactional
+    public LessonResponse updateLesson(Long lessonId, LessonUpdateRequest request) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
+
+        lesson.setTitle(request.getTitle());
+        lesson.setType(request.getType());
+        lesson.setUrlVid(request.getUrlVid());
+
+        lessonRepository.save(lesson);
+        return toLessonResponse(lesson);
+    }
+
+    @Override
+    @Transactional
+    public void deleteLesson(Long lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
+
+        lessonRepository.delete(lesson);
+    }
+
     // ============================================================
-    // Helper methods
+    // API helper methods
     // ============================================================
 
+    @Override
+    @Transactional(readOnly = true)
+    public CourseStructureResponse getStructure(Long id) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+
+        return toCourseStructure(course);
+    }
+
     private void validateDates(LocalDate start, LocalDate end) {
-        // Nếu 1 trong 2 null thì bỏ qua, không validate
-        if (start == null || end == null) {
-            return;
-        }
+        if (start == null || end == null) return;
 
         if (end.isBefore(start)) {
             throw new BadRequestException("End date must be after start date");
@@ -234,6 +273,7 @@ public class CourseServiceImpl implements CourseService {
         return ChapterResponse.builder()
                 .id(chapter.getId())
                 .title(chapter.getTitle())
+                .description(chapter.getDescription())
                 .lessons(
                         chapter.getLessons().stream()
                                 .map(this::toLessonResponse)

@@ -1,9 +1,11 @@
 package com.example.center_management.service;
 
 import com.example.center_management.dto.request.ChapterCreateRequest;
+import com.example.center_management.dto.request.ChapterUpdateRequest;
 import com.example.center_management.dto.request.CourseCreateRequest;
 import com.example.center_management.dto.request.CourseUpdateRequest;
 import com.example.center_management.dto.request.LessonCreateRequest;
+import com.example.center_management.dto.request.LessonUpdateRequest;
 import com.example.center_management.dto.response.ChapterResponse;
 import com.example.center_management.dto.response.CourseResponse;
 import com.example.center_management.dto.response.CourseStructureResponse;
@@ -29,14 +31,14 @@ public interface CourseService {
      */
     CourseStructureResponse getStructure(Long id);
 
-    /**
-     * Thêm chương mới vào khóa học.
-     */
+    // Chapter
     ChapterResponse addChapter(Long courseId, ChapterCreateRequest request);
+    ChapterResponse updateChapter(Long chapterId, ChapterUpdateRequest request);
+    void deleteChapter(Long chapterId);
 
-    /**
-     * Thêm bài học mới vào chương.
-     */
+    // Lesson
     LessonResponse addLesson(Long chapterId, LessonCreateRequest request);
-    
+    LessonResponse updateLesson(Long lessonId, LessonUpdateRequest request);
+    void deleteLesson(Long lessonId);
+
 }

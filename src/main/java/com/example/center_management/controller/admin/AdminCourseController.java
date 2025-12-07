@@ -1,22 +1,23 @@
-package com.example.center_management.controller.admin;
+    package com.example.center_management.controller.admin;
 
-import com.example.center_management.dto.request.ChapterCreateRequest;
-import com.example.center_management.dto.request.CourseCreateRequest;
-import com.example.center_management.dto.request.CourseUpdateRequest;
-import com.example.center_management.dto.response.ChapterResponse;
-import com.example.center_management.dto.response.CourseResponse;
-import com.example.center_management.dto.response.CourseStructureResponse;
-import com.example.center_management.service.CourseService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+    import com.example.center_management.dto.request.ChapterCreateRequest;
+    import com.example.center_management.dto.request.CourseCreateRequest;
+    import com.example.center_management.dto.request.CourseUpdateRequest;
+    import com.example.center_management.dto.response.ChapterResponse;
+    import com.example.center_management.dto.response.CourseResponse;
+    import com.example.center_management.dto.response.CourseStructureResponse;
+    import com.example.center_management.service.CourseService;
+    import com.example.center_management.dto.request.ChapterUpdateRequest;
+    import jakarta.validation.Valid;
+    import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.*;
+    import org.springframework.data.domain.Page;
+    import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api/admin/courses")
-@RequiredArgsConstructor
-public class AdminCourseController {
+    @RestController
+    @RequestMapping("/api/admin/courses")
+    @RequiredArgsConstructor
+    public class AdminCourseController {
 
     private final CourseService courseService;
 
@@ -27,19 +28,31 @@ public class AdminCourseController {
 
     @PutMapping("/{id}")
     public CourseResponse update(@PathVariable Long id,
-                                 @Valid @RequestBody CourseUpdateRequest request) {
+            @Valid @RequestBody CourseUpdateRequest request) {
         return courseService.update(id, request);
     }
 
     @PostMapping("/{courseId}/chapters")
     public ChapterResponse addChapter(@PathVariable Long courseId,
-                                      @Valid @RequestBody ChapterCreateRequest request) {
+        @Valid @RequestBody ChapterCreateRequest request) {
         return courseService.addChapter(courseId, request);
     }
+    // Sửa chapter
+    @PutMapping("/chapters/{chapterId}")
+    public ChapterResponse updateChapter(@PathVariable Long chapterId,
+        @Valid @RequestBody ChapterUpdateRequest request) {
+        return courseService.updateChapter(chapterId, request);
+    }
+
+    // Xóa chapter
+    @DeleteMapping("/chapters/{chapterId}")
+        public void deleteChapter(@PathVariable Long chapterId) {
+        courseService.deleteChapter(chapterId);
+    }
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+        public void delete(@PathVariable Long id) {
     courseService.delete(id); // soft delete: set INACTIVE
-}
+    }
 
     @GetMapping
     public Page<CourseResponse> getAll(
@@ -61,4 +74,4 @@ public class AdminCourseController {
         return courseService.getStructure(id);
     }
 
-}
+    }

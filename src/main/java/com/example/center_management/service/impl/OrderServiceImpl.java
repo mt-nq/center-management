@@ -53,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
         order.setApprovalStatus(ApprovalStatus.PENDING);
         order.setCreatedAt(LocalDateTime.now());
         order.setPrice(course.getPrice());
-        
+
         orderRepository.save(order);
 
         return toResponse(order);
