@@ -31,6 +31,7 @@ public class CertificateServiceImpl implements CertificateService {
 
     private final EnrollmentRepository enrollmentRepository;
     private final CertificateRepository certificateRepository;
+    
 
     // =============== CẤP CHỨNG CHỈ THỦ CÔNG (ISSUE TRỰC TIẾP) ===============
     @Override
@@ -76,7 +77,7 @@ public class CertificateServiceImpl implements CertificateService {
         // 1) Nếu CHƯA COMPLETED → đảm bảo không có certificate hợp lệ
         if (enrollment.getStatus() != EnrollmentStatus.COMPLETED) {
             if (certificate != null) {
-                certificate.setResult(CertificateResult.FAIL);
+                certificate.setResult(CertificateResult.NOT_REVIEWED);
                 certificate.setCertificateCode(null);
                 certificate.setIssuedAt(null);
                 certificateRepository.save(certificate);
@@ -88,7 +89,7 @@ public class CertificateServiceImpl implements CertificateService {
         CompletionResult completionResult = enrollment.getCompletionResult();
         if (completionResult == null) {
             if (certificate != null) {
-                certificate.setResult(CertificateResult.FAIL);
+                certificate.setResult(CertificateResult.NOT_REVIEWED);
                 certificate.setCertificateCode(null);
                 certificate.setIssuedAt(null);
                 certificateRepository.save(certificate);
@@ -98,6 +99,7 @@ public class CertificateServiceImpl implements CertificateService {
 
         // 3) ĐÃ COMPLETED + CÓ completionResult → xử lý PASSED / FAILED
         switch (completionResult) {
+            case NOT_REVIEWED -> handleNotReviewed(enrollment, certificate);
             case PASSED -> handlePassed(enrollment, certificate);
             case FAILED -> handleFailed(enrollment, certificate);
         }
@@ -122,7 +124,6 @@ public class CertificateServiceImpl implements CertificateService {
 
     private void handleFailed(Enrollment enrollment, Certificate certificate) {
         if (certificate == null) {
-            // FAILED nhưng chưa bao giờ được cấp certificate → bỏ qua
             return;
         }
 
@@ -132,6 +133,21 @@ public class CertificateServiceImpl implements CertificateService {
 
         certificateRepository.save(certificate);
     }
+
+    private void handleNotReviewed(Enrollment enrollment, Certificate certificate) {
+    if (certificate == null) {
+        certificate = new Certificate();
+        certificate.setEnrollment(enrollment);
+    }
+
+    // Chưa duyệt -> KHÔNG cấp code & issuedAt
+    certificate.setResult(CertificateResult.NOT_REVIEWED);
+    certificate.setCertificateCode(null);
+    certificate.setIssuedAt(null);
+
+    certificateRepository.save(certificate);
+    }
+
 
     private String generateCertificateCode(Enrollment enrollment) {
         if (enrollment == null || enrollment.getId() == null) {

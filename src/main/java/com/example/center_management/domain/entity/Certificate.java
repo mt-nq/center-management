@@ -27,7 +27,7 @@ public class Certificate {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "result", nullable = false)
-    private CertificateResult result; // PASSED / FAILED
+    private CertificateResult result; // NOT_REVIEWED / PASS / FAIL
 
     @Column(name = "certificate_code", length = 50, unique = true)
     private String certificateCode;

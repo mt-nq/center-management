@@ -160,6 +160,8 @@ public class StudentServiceImpl implements StudentService {
         if (student.getUser() != null) {
         res.setEmail(student.getUser().getEmail());
         res.setPhone(student.getUser().getPhone());
+        res.setCreatedAt(student.getUser().getCreatedAt());
+        res.setUpdatedAt(student.getUser().getUpdatedAt());
         }
 
         return res;

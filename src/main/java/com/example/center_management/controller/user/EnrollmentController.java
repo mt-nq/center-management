@@ -35,15 +35,6 @@ public class EnrollmentController {
         return enrollmentService.enroll(request);
     }
 
-    // (tuỳ bạn, nếu muốn vẫn có list all cho admin thì sau này chuyển sang admin controller)
-    @GetMapping
-    public Page<EnrollmentResponse> getAll(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
-    ) {
-        return enrollmentService.getAll(page, size);
-    }
-
     // NEW: Student xem danh sách enrollment của chính mình
     @GetMapping("/me")
     public List<EnrollmentResponse> getMyEnrollments(Authentication authentication) {

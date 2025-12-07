@@ -63,5 +63,5 @@ public class Student {
 
 
     @OneToMany(mappedBy = "student")
-    private List<Enrollment> enrollments;    
+    private List<Enrollment> enrollments;
 }

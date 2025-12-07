@@ -16,6 +16,7 @@ import com.example.center_management.service.ProgressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.center_management.service.CertificateService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +29,7 @@ public class ProgressServiceImpl implements ProgressService {
     private final EnrollmentRepository enrollmentRepository;
     private final LessonRepository lessonRepository;
     private final LessonProgressRepository lessonProgressRepository;
+    private final CertificateService certificateService;
 
     @Override
     @Transactional
@@ -81,9 +83,11 @@ public class ProgressServiceImpl implements ProgressService {
         }
         if (enrollment.getCompletionResult() == null) {
                 enrollment.setCompletionResult(CompletionResult.NOT_REVIEWED);
-        } 
+        }
 
-        enrollmentRepository.save(enrollment);
+        Enrollment saved = enrollmentRepository.save(enrollment);
+
+        certificateService.syncFromEnrollment(saved);
         } else {
             if (enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
                 enrollment.setStatus(EnrollmentStatus.NOT_COMPLETED); 
