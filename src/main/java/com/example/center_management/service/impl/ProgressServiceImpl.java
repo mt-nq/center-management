@@ -143,7 +143,9 @@ public class ProgressServiceImpl implements ProgressService {
         return EnrollmentProgressResponse.builder()
                 .enrollmentId(enrollment.getId())
                 .studentId(enrollment.getStudent().getId())
+                .studentCode(enrollment.getStudent().getCode()) 
                 .courseId(courseId)
+                .courseCode(enrollment.getCourse().getCode()) 
                 .studentName(enrollment.getStudent().getFullName())
                 .courseTitle(enrollment.getCourse().getTitle())
                 .totalVideoLessons(totalVideos)
@@ -181,4 +183,12 @@ public class ProgressServiceImpl implements ProgressService {
                         .map(enrollment -> buildProgressResponse(enrollment.getId()))
                         .collect(Collectors.toList());
         }
+        @Override
+        @Transactional(readOnly = true)
+        public List<EnrollmentProgressResponse> getAllProgressByStudent(Long studentId) {
+        return enrollmentRepository.findByStudent_Id(studentId)
+                .stream()
+                .map(enrollment -> buildProgressResponse(enrollment.getId()))
+                .collect(Collectors.toList());
+}
 }

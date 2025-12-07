@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import com.example.center_management.domain.entity.Enrollment;
 import com.example.center_management.domain.enums.CompletionResult;
 import com.example.center_management.domain.enums.EnrollmentStatus;
+import java.util.List;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
@@ -24,4 +25,5 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             Pageable pageable
     );
 
+    List<Enrollment> findByStudent_Id(Long studentId);
 }

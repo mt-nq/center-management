@@ -22,4 +22,10 @@ public class AdminProgressController {
     public List<EnrollmentProgressResponse> getAllProgressForAdmin() {
         return progressService.getAllEnrollmentProgressForAdmin();
     }
+
+     // GET /admin/students/{studentId}/courses -> Xem tất cả khóa học + tiến độ của 1 học viên
+    @GetMapping("/students/{studentId}/courses")
+    public List<EnrollmentProgressResponse> getCoursesOfStudent(@PathVariable Long studentId) {
+        return progressService.getAllProgressByStudent(studentId);
+    }
 }

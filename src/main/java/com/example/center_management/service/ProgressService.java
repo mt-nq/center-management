@@ -17,4 +17,7 @@ public interface ProgressService {
     List<EnrollmentProgressResponse> getEnrollmentsWithFullProgress();
 
     List<EnrollmentProgressResponse> getAllEnrollmentProgressForAdmin();
+
+    List<EnrollmentProgressResponse> getAllProgressByStudent(Long studentId);
 }
+
