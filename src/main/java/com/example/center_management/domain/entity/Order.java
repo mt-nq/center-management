@@ -31,7 +31,7 @@ public class Order {
     private Course course;
 
     @Column(precision = 15, scale = 2)
-    private BigDecimal amount;
+    private BigDecimal price;
 
     // ====== THÊM MỚI: PAYMENT STATUS ======
     @Enumerated(EnumType.STRING)

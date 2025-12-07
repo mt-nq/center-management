@@ -42,5 +42,4 @@ public class EnrollmentController {
         Long studentId = studentService.findStudentIdByUsername(username);
         return enrollmentService.getByStudent(studentId);
     }
-
 }

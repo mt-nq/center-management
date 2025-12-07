@@ -24,7 +24,7 @@ public class OrderResponse {
     private Long courseId;
     private String courseTitle;
 
-    private BigDecimal totalAmount;         // khớp Order.amount
+    private BigDecimal price;         // khớp Order.price
 
     private PaymentStatus paymentStatus;    // enum
     private ApprovalStatus approvalStatus;  // enum

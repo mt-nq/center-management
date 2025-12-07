@@ -52,7 +52,8 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentStatus(PaymentStatus.PENDING);
         order.setApprovalStatus(ApprovalStatus.PENDING);
         order.setCreatedAt(LocalDateTime.now());
-
+        order.setPrice(course.getPrice());
+        
         orderRepository.save(order);
 
         return toResponse(order);
@@ -156,8 +157,8 @@ public class OrderServiceImpl implements OrderService {
             // res.setCourseCode(order.getCourse().getCourseCode());
         }
 
-        // entity của bạn đang dùng amount
-        res.setTotalAmount(order.getAmount());
+        // entity của bạn đang dùng price
+        res.setPrice(order.getPrice());
 
         res.setPaymentStatus(order.getPaymentStatus());
         res.setApprovalStatus(order.getApprovalStatus());
