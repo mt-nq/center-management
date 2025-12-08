@@ -28,6 +28,10 @@ public class AdminOrderController {
         return orderService.getPendingOrders();
     }
 
+    @GetMapping("/approved")
+    public List<OrderResponse> getApprovedOrders() {
+        return orderService.getApprovedOrders();
+    }
     // ========== PUT /admin/orders/{id}/approve ==========
     @PutMapping("/{id}/approve")
     public OrderResponse approve(@PathVariable Long id) {

@@ -106,6 +106,14 @@ public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getApprovedOrders() {
+        return orderRepository.findByApprovalStatus(ApprovalStatus.APPROVED)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
     // ================== ADMIN: DUYỆT ĐƠN ==================
     @Override
     public OrderResponse approveOrder(Long orderId) {

@@ -2,7 +2,7 @@ package com.example.center_management.repository;
 
 import com.example.center_management.domain.entity.LessonProgress;
 import org.springframework.data.jpa.repository.JpaRepository;
-
+import jakarta.transaction.Transactional;
 import java.util.Optional;
 
 public interface LessonProgressRepository extends JpaRepository<LessonProgress, Long> {
@@ -12,4 +12,7 @@ public interface LessonProgressRepository extends JpaRepository<LessonProgress, 
 
     // Đếm số VIDEO đã hoàn thành trong 1 enrollment
     long countByEnrollment_IdAndCompletedTrueAndLesson_Type(Long enrollmentId, String type);
+
+    @Transactional
+    void deleteByLessonId(Long lessonId);
 }

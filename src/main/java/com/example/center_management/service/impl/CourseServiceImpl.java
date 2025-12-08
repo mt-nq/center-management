@@ -20,9 +20,12 @@ import com.example.center_management.exception.BadRequestException;
 import com.example.center_management.exception.ResourceNotFoundException;
 import com.example.center_management.repository.ChapterRepository;
 import com.example.center_management.repository.CourseRepository;
+import com.example.center_management.repository.LessonProgressRepository;
 import com.example.center_management.repository.LessonRepository;
 import com.example.center_management.service.CourseService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +39,9 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final ChapterRepository chapterRepository;
     private final LessonRepository lessonRepository;
+
+    @Autowired
+    private LessonProgressRepository lessonProgressRepository;
 
     // ============================================================
     // CRUD cơ bản cho Course
@@ -121,16 +127,27 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public void delete(Long id) {
-        Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("course not found"));
+    public void delete(Long courseId) {
+        // 1. Lấy course
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        if ("INACTIVE".equalsIgnoreCase(course.getStatus())) return;
+        // 2. Soft delete tất cả chapter và lesson con
+        List<Chapter> chapters = chapterRepository.findByCourseId(courseId);
+        for (Chapter chapter : chapters) {
+            List<Lesson> lessons = lessonRepository.findByChapterId(chapter.getId());
+            for (Lesson lesson : lessons) {
+                lesson.setStatus(Status.INACTIVE); // Soft delete lesson
+                lessonRepository.save(lesson);
+            }
+            chapter.setStatus(Status.INACTIVE); // Soft delete chapter
+            chapterRepository.save(chapter);
+        }
 
-        course.setStatus("INACTIVE");
+        // 3. Soft delete course
+        course.setStatus(Status.INACTIVE);
         courseRepository.save(course);
     }
-
     // ============================================================
     // Chapter
     // ============================================================
@@ -165,10 +182,19 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public void deleteChapter(Long chapterId) {
-        Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new ResourceNotFoundException("Chapter not found"));
+        // 1. Lấy tất cả lesson trong chapter
+        List<Lesson> lessons = lessonRepository.findByChapterId(chapterId);
 
-        chapterRepository.delete(chapter);
+        // 2. Xóa các lesson_progress liên quan từng lesson
+        for (Lesson lesson : lessons) {
+            lessonProgressRepository.deleteByLessonId(lesson.getId());
+        }
+
+        // 3. Xóa các lesson
+        lessonRepository.deleteAll(lessons);
+
+        // 4. Xóa chapter
+        chapterRepository.deleteById(chapterId);
     }
 
     // ============================================================
@@ -209,10 +235,11 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public void deleteLesson(Long lessonId) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
+        // 1. Xóa tất cả lesson_progress liên quan
+        lessonProgressRepository.deleteByLessonId(lessonId);
 
-        lessonRepository.delete(lesson);
+        // 2. Xóa lesson
+        lessonRepository.deleteById(lessonId);
     }
 
     // ============================================================

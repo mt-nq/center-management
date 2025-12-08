@@ -14,6 +14,8 @@ public interface OrderService {
     // GET /admin/orders/pending
     List<OrderResponse> getPendingOrders();
 
+    List<OrderResponse> getApprovedOrders();
+
     // PUT /admin/orders/{id}/approve
     OrderResponse approveOrder(Long orderId);
 

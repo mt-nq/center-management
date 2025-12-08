@@ -11,7 +11,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Lấy đơn chờ duyệt
     List<Order> findByApprovalStatus(ApprovalStatus approvalStatus);
-
     // Lấy đơn theo học viên (nếu cần)
     List<Order> findByStudent_Id(Long studentId);
 
