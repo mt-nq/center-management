@@ -65,7 +65,7 @@ public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
             boolean hasActiveEnrollment = enrollmentRepository.existsByStudentIdAndCourseIdAndStatusIn(
                     studentId,
                     course.getId(),
-                    List.of(EnrollmentStatus.ENROLLED, EnrollmentStatus.COMPLETE)
+                    List.of(EnrollmentStatus.ENROLLED, EnrollmentStatus.COMPLETED)
             );
 
             if (hasActiveEnrollment) {
@@ -128,6 +128,7 @@ public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
         enrollmentService.enroll(enrollReq);
 
         order.setApprovalStatus(ApprovalStatus.APPROVED);
+        order.setPaymentStatus(PaymentStatus.PAID);
         order.setApprovedAt(LocalDateTime.now());
 
         order = orderRepository.save(order);
@@ -150,6 +151,7 @@ public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
         }
 
         order.setApprovalStatus(ApprovalStatus.REJECTED);
+        order.setPaymentStatus(PaymentStatus.FAILED);
         order.setRejectedAt(LocalDateTime.now());
 
         order = orderRepository.save(order);
