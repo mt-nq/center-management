@@ -5,6 +5,7 @@ import com.example.center_management.domain.entity.Order;
 import com.example.center_management.domain.entity.Student;
 import com.example.center_management.domain.enums.ApprovalStatus;
 import com.example.center_management.domain.enums.CompletionResult;
+import com.example.center_management.domain.enums.EnrollmentStatus;
 import com.example.center_management.domain.enums.PaymentStatus;
 import com.example.center_management.dto.request.EnrollmentCreateRequest;
 import com.example.center_management.dto.request.OrderCreateRequest;
@@ -12,6 +13,7 @@ import com.example.center_management.dto.response.OrderResponse;
 import com.example.center_management.exception.BadRequestException;
 import com.example.center_management.exception.ResourceNotFoundException;
 import com.example.center_management.repository.CourseRepository;
+import com.example.center_management.repository.EnrollmentRepository;
 import com.example.center_management.repository.OrderRepository;
 import com.example.center_management.repository.StudentRepository;
 import com.example.center_management.service.EnrollmentService;
@@ -36,42 +38,64 @@ public class OrderServiceImpl implements OrderService {
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
     private final EnrollmentService enrollmentService;
+    private final EnrollmentRepository enrollmentRepository;
 
     // ================== STUDENT: TẠO ĐƠN HÀNG ==================
-    @Override
-    public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
-        // Lấy student từ id đã resolve từ JWT
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+@Override
+public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
 
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+    Student student = studentRepository.findById(studentId)
+            .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
-        // Kiểm tra học sinh đã mua khóa học này chưa
-        List<Order> existingOrders = orderRepository.findByStudentIdAndCourseId(studentId, course.getId());
+    Course course = courseRepository.findById(request.getCourseId())
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        for (Order existingOrder : existingOrders) {
-            CompletionResult result = existingOrder.getCompletionResult(); // Giả sử Order có field completionResult
-            if (result == CompletionResult.PASSED || result == CompletionResult.NOT_REVIEWED) {
-                // Đang học hoặc đã đạt => không được mua lại
-                throw new IllegalStateException("You cannot purchase this course again.");
-            }
-            // Nếu result == FAILED => có thể mua lại
+    List<Order> existingOrders = orderRepository.findByStudentIdAndCourseId(studentId, course.getId());
+
+    for (Order existingOrder : existingOrders) {
+
+        // 1) Đơn đang chờ duyệt
+        if (existingOrder.getApprovalStatus() == ApprovalStatus.PENDING) {
+            throw new BadRequestException("Your previous order for this course is still pending.");
         }
 
-        // Tạo order mới
-        Order order = new Order();
-        order.setStudent(student);
-        order.setCourse(course);
-        order.setPaymentStatus(PaymentStatus.PENDING);
-        order.setApprovalStatus(ApprovalStatus.PENDING);
-        order.setCreatedAt(LocalDateTime.now());
-        order.setPrice(course.getPrice());
+        // 2) Đơn đã duyệt -> kiểm tra enrollment
+        if (existingOrder.getApprovalStatus() == ApprovalStatus.APPROVED) {
 
-        orderRepository.save(order);
+            boolean hasActiveEnrollment = enrollmentRepository.existsByStudentIdAndCourseIdAndStatusIn(
+                    studentId,
+                    course.getId(),
+                    List.of(EnrollmentStatus.ENROLLED, EnrollmentStatus.COMPLETE)
+            );
 
-        return toResponse(order);
+            if (hasActiveEnrollment) {
+                throw new BadRequestException("You already have an active or completed enrollment for this course.");
+            }
+        }
+
+        // 3) Check completionResult (nếu bạn lưu trên Order)
+        CompletionResult result = existingOrder.getCompletionResult();
+        if (result == CompletionResult.PASSED || result == CompletionResult.NOT_REVIEWED) {
+            throw new BadRequestException("You cannot purchase this course again.");
+        }
+
+        // Nếu FAILED -> cho phép mua lại
     }
+
+    // Tạo đơn mới
+    Order order = new Order();
+    order.setStudent(student);
+    order.setCourse(course);
+    order.setPaymentStatus(PaymentStatus.PENDING);
+    order.setApprovalStatus(ApprovalStatus.PENDING);
+    order.setCreatedAt(LocalDateTime.now());
+    order.setPrice(course.getPrice());
+
+    orderRepository.save(order);
+
+    return toResponse(order);
+}
+
     // ================== ADMIN: LẤY ĐƠN CHỜ DUYỆT ==================
     @Override
     @Transactional(readOnly = true)
