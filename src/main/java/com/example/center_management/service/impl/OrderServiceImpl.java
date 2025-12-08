@@ -4,6 +4,7 @@ import com.example.center_management.domain.entity.Course;
 import com.example.center_management.domain.entity.Order;
 import com.example.center_management.domain.entity.Student;
 import com.example.center_management.domain.enums.ApprovalStatus;
+import com.example.center_management.domain.enums.CompletionResult;
 import com.example.center_management.domain.enums.PaymentStatus;
 import com.example.center_management.dto.request.EnrollmentCreateRequest;
 import com.example.center_management.dto.request.OrderCreateRequest;
@@ -46,6 +47,19 @@ public class OrderServiceImpl implements OrderService {
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
+        // Kiểm tra học sinh đã mua khóa học này chưa
+        List<Order> existingOrders = orderRepository.findByStudentIdAndCourseId(studentId, course.getId());
+
+        for (Order existingOrder : existingOrders) {
+            CompletionResult result = existingOrder.getCompletionResult(); // Giả sử Order có field completionResult
+            if (result == CompletionResult.PASSED || result == CompletionResult.NOT_REVIEWED) {
+                // Đang học hoặc đã đạt => không được mua lại
+                throw new IllegalStateException("You cannot purchase this course again.");
+            }
+            // Nếu result == FAILED => có thể mua lại
+        }
+
+        // Tạo order mới
         Order order = new Order();
         order.setStudent(student);
         order.setCourse(course);
@@ -58,7 +72,6 @@ public class OrderServiceImpl implements OrderService {
 
         return toResponse(order);
     }
-
     // ================== ADMIN: LẤY ĐƠN CHỜ DUYỆT ==================
     @Override
     @Transactional(readOnly = true)
