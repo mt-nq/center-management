@@ -1,6 +1,7 @@
 package com.example.center_management.domain.entity;
 
 import com.example.center_management.domain.enums.ApprovalStatus;
+import com.example.center_management.domain.enums.CompletionResult;
 import com.example.center_management.domain.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,4 +51,8 @@ public class Order {
     private LocalDateTime approvedAt;
 
     private LocalDateTime rejectedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "completion_result", length = 20)
+    private CompletionResult completionResult;
 }

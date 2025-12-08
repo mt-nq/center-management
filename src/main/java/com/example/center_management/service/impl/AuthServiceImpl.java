@@ -4,7 +4,7 @@ import com.example.center_management.domain.entity.Student;
 import com.example.center_management.domain.entity.User;
 import com.example.center_management.domain.enums.Role;
 import com.example.center_management.dto.auth.AuthLoginRequest;
-import com.example.center_management.dto.auth.StudentRegisterRequest;
+import com.example.center_management.dto.auth.AuthRegisterRequest;
 import com.example.center_management.dto.response.AuthResponse;
 import com.example.center_management.dto.response.UserSimpleResponse;
 import com.example.center_management.repository.UserRepository;
@@ -35,7 +35,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public AuthResponse registerStudent(StudentRegisterRequest request) {
+    public AuthResponse registerStudent(AuthRegisterRequest request) {
         // 1. Tạo user mới với role STUDENT
         User user = User.builder()
                 .username(request.getUsername())

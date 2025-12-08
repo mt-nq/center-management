@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.center_management.dto.auth.AuthLoginRequest;
-import com.example.center_management.dto.auth.StudentRegisterRequest;
+import com.example.center_management.dto.auth.AuthRegisterRequest;
 import com.example.center_management.dto.response.AuthResponse;
 import com.example.center_management.service.AuthService;
 
@@ -25,7 +25,7 @@ public class AuthController {
     // POST /api/auth/register – Đăng ký Học viên (Public, 201)
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse register(@Valid @RequestBody StudentRegisterRequest request) {
+    public AuthResponse register(@Valid @RequestBody AuthRegisterRequest request) {
         return authService.registerStudent(request);
     }
 

@@ -2,15 +2,10 @@ package com.example.center_management.controller.admin;
 
 import java.util.List;
 
-import com.example.center_management.dto.auth.AdminCreateRequest;
 import com.example.center_management.dto.response.UserResponse;
-import com.example.center_management.dto.response.UserSimpleResponse;
-import com.example.center_management.service.AuthService;
 import com.example.center_management.service.UserService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AdminUserController {
 
-    private final AuthService authService;
     private final UserService userService;
     // GET /admin/users – Lấy danh sách tất cả user (200)
     @GetMapping

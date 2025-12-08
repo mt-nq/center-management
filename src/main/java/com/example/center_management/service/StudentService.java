@@ -2,7 +2,7 @@ package com.example.center_management.service;
 
 import java.util.List;
 
-import com.example.center_management.dto.auth.StudentRegisterRequest;
+import com.example.center_management.dto.auth.AuthRegisterRequest;
 import com.example.center_management.dto.request.StudentUpdateRequest;
 import com.example.center_management.dto.response.StudentResponse;
 import org.springframework.data.domain.Page;
@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public interface StudentService {
 
-    Student createForUser(User user, StudentRegisterRequest request);
+    Student createForUser(User user, AuthRegisterRequest request);
 
     StudentResponse getById(Long id);
 

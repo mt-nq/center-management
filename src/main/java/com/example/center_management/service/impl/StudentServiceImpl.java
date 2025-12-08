@@ -14,7 +14,7 @@ import org.springframework.data.domain.PageRequest;
 
 import com.example.center_management.domain.entity.Student;
 import com.example.center_management.domain.entity.User;
-import com.example.center_management.dto.auth.StudentRegisterRequest;
+import com.example.center_management.dto.auth.AuthRegisterRequest;
 import com.example.center_management.dto.request.StudentUpdateRequest;
 import com.example.center_management.dto.response.StudentResponse;
 import com.example.center_management.exception.ResourceNotFoundException;
@@ -33,7 +33,7 @@ public class StudentServiceImpl implements StudentService {
     // ================== AUTO TẠO STUDENT KHI ĐĂNG KÝ USER ==================
     @Override
     @Transactional
-    public Student createForUser(User user, StudentRegisterRequest request) {
+    public Student createForUser(User user, AuthRegisterRequest request) {
         Student student = Student.builder()
             .fullName(request.getFullName() != null ? request.getFullName() : user.getFullName())
             .dob(request.getDob())
