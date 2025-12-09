@@ -9,6 +9,8 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.example.center_management.domain.enums.CourseStatus;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,8 +50,8 @@ public class Course {
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 
-    @Column(length = 20)
-    private String status; // ACTIVE / INACTIVE
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -106,14 +106,6 @@ public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
                 .toList();
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<OrderResponse> getApprovedOrders() {
-        return orderRepository.findByApprovalStatus(ApprovalStatus.APPROVED)
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
     // ================== ADMIN: DUYỆT ĐƠN ==================
     @Override
     public OrderResponse approveOrder(Long orderId) {
@@ -134,7 +126,7 @@ public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
         enrollReq.setStudentId(order.getStudent().getId());
         enrollReq.setCourseId(order.getCourse().getId());
         enrollmentService.enroll(enrollReq);
-
+        
         order.setApprovalStatus(ApprovalStatus.APPROVED);
         order.setPaymentStatus(PaymentStatus.PAID);
         order.setApprovedAt(LocalDateTime.now());
@@ -142,7 +134,7 @@ public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
         order = orderRepository.save(order);
         return toResponse(order);
     }
-
+    
     // ================== ADMIN: TỪ CHỐI ĐƠN ==================
     @Override
     public OrderResponse rejectOrder(Long orderId) {
@@ -157,20 +149,36 @@ public OrderResponse createOrder(Long studentId, OrderCreateRequest request) {
         if (currentStatus == ApprovalStatus.REJECTED) {
             throw new BadRequestException("Order already rejected");
         }
-
+        
         order.setApprovalStatus(ApprovalStatus.REJECTED);
         order.setPaymentStatus(PaymentStatus.FAILED);
         order.setRejectedAt(LocalDateTime.now());
-
+        
         order = orderRepository.save(order);
         return toResponse(order);
     }
-
+    
     @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersByStudent(Long studentId) {
         return orderRepository.findByStudent_Id(studentId)
                 .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getApprovedOrders() {
+        return orderRepository.findByApprovalStatus(ApprovalStatus.APPROVED)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getRejectedOrders() {
+        return orderRepository.findByApprovalStatus(ApprovalStatus.REJECTED)
+        .stream()
                 .map(this::toResponse)
                 .toList();
     }

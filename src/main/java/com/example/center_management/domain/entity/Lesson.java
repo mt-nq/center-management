@@ -1,5 +1,7 @@
 package com.example.center_management.domain.entity;
 
+import com.example.center_management.domain.enums.CourseStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,4 +30,8 @@ public class Lesson {
 
     @Column(name = "url_vid")
     private String urlVid;
+
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status;
+
 }

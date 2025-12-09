@@ -6,6 +6,9 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import com.example.center_management.domain.enums.CourseStatus;
+
 @Entity
 @Table(name = "chapters")
 @Getter
@@ -30,4 +33,7 @@ public class Chapter {
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Lesson> lessons = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status;
 }

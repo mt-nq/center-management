@@ -16,6 +16,8 @@ public interface OrderService {
 
     List<OrderResponse> getApprovedOrders();
 
+    List<OrderResponse> getRejectedOrders();
+
     // PUT /admin/orders/{id}/approve
     OrderResponse approveOrder(Long orderId);
 

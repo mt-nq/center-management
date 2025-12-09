@@ -32,6 +32,10 @@ public class AdminOrderController {
     public List<OrderResponse> getApprovedOrders() {
         return orderService.getApprovedOrders();
     }
+    @GetMapping("/rejected")
+    public List<OrderResponse> getRejectedOrders() {
+        return orderService.getRejectedOrders();
+    }
     // ========== PUT /admin/orders/{id}/approve ==========
     @PutMapping("/{id}/approve")
     public OrderResponse approve(@PathVariable Long id) {

@@ -23,6 +23,7 @@ import com.example.center_management.repository.CourseRepository;
 import com.example.center_management.repository.LessonProgressRepository;
 import com.example.center_management.repository.LessonRepository;
 import com.example.center_management.service.CourseService;
+import com.example.center_management.domain.enums.CourseStatus;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ public class CourseServiceImpl implements CourseService {
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .content(request.getContent())
-                .status("ACTIVE")
+                .status(CourseStatus.ACTIVE)
                 .price(request.getPrice())
                 .build();
 
@@ -81,7 +82,7 @@ public class CourseServiceImpl implements CourseService {
 
         List<CourseResponse> allActiveCourses = courseRepository.findAll()
                 .stream()
-                .filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus()))
+                .filter(s -> s.getStatus() == CourseStatus.ACTIVE)
                 .map(this::toResponse)
                 .toList();
 
@@ -137,15 +138,15 @@ public class CourseServiceImpl implements CourseService {
         for (Chapter chapter : chapters) {
             List<Lesson> lessons = lessonRepository.findByChapterId(chapter.getId());
             for (Lesson lesson : lessons) {
-                lesson.setStatus(Status.INACTIVE); // Soft delete lesson
+                lesson.setStatus(CourseStatus.INACTIVE); // Soft delete lesson
                 lessonRepository.save(lesson);
             }
-            chapter.setStatus(Status.INACTIVE); // Soft delete chapter
+            chapter.setStatus(CourseStatus.INACTIVE); // Soft delete chapter
             chapterRepository.save(chapter);
         }
 
         // 3. Soft delete course
-        course.setStatus(Status.INACTIVE);
+        course.setStatus(CourseStatus.INACTIVE);
         courseRepository.save(course);
     }
     // ============================================================
@@ -276,7 +277,7 @@ public class CourseServiceImpl implements CourseService {
         res.setStartDate(c.getStartDate());
         res.setEndDate(c.getEndDate());
         res.setContent(c.getContent());
-        res.setStatus(c.getStatus());
+        res.setStatus(c.getStatus().name());
         res.setPrice(c.getPrice());
         res.setCreatedAt(c.getCreatedAt());
         res.setUpdatedAt(c.getUpdatedAt());
